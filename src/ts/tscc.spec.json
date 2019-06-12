@@ -1,0 +1,20 @@
+{
+	"modules": {
+		"index": "./index.ts"
+	},
+	"external": {
+		"timeago.js": "timeago",
+		"@glidejs/glide": "Glide"
+	},
+	"closureLibrary": true,
+	"prefix": {
+		"rollup": "../../public-dev/",
+		"cc": "../../public/"
+	},
+	"compilerFlags": {
+		"assume_function_wrapper": true,
+		"rewrite_polyfills": false,
+		"language_out": "ECMASCRIPT_2015"
+	},
+	"debug":true
+}

@@ -1,0 +1,37 @@
+<head>
+	<title>STNM TESET PAGE</title>
+	<style>
+		@font-face {
+			font-family: 'Optima';
+			font-style: normal;
+			font-weight: normal;
+			src: local('Optima'), url('./static/main.woff') format('woff');
+		}
+
+		@font-face {
+			font-family: 'American Typewriter';
+			font-style: normal;
+			font-weight: normal;
+			src: local('American Typewriter'), url('.static/sub.woff') format('woff');
+		}
+	</style>
+</head>
+
+<body>
+	<script>
+		function log(a) {
+			let text = document.createTextNode(a);
+			document.body.appendChild(text);
+		}
+		window.addEventListener('error', (evt) => {
+			log("Error! " + evt.error.toString() + " on file " + evt.filename + ", (" + evt.colno + ", " + evt.lineno + ")");
+		});
+	</script>
+	<script src="/static/wxSym.js" type="text/javascript"></script>
+	<script src="/build_test/stnm/index.js" type="text/javascript"></script>
+	<script>
+		// Livereload
+		document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+			':10001/livereload.js?snipver=1"></' + 'script>')
+	</script>
+</body>

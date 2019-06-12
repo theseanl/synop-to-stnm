@@ -1,0 +1,42 @@
+@import './variables.css';
+
+#queries__container {
+	width: var(--queries-list-width);
+	max-width: 500px;
+	height: 200px;
+	overflow: visible;
+	body.collapsed & {
+		padding: 0;
+		opacity: 0;
+		height: 0px;
+	}
+}
+
+.query {
+	display: flex;
+	margin: 0 0 20px 0;
+	font-size: 18px;
+	align-items: center;
+	justify-content: space-between;
+	white-space: nowrap;
+
+	&__string > div {
+		@media (min-width: 600px) {
+			display: inline;
+
+			&:first-child {
+				margin-right: 10px;
+			}
+		}
+	}
+	&__date, &__delete {
+		display: inline;
+	}
+	&__delete{
+		margin-left: 20px;
+		&>img {
+			vertical-align: text-bottom;
+			padding-bottom: 1px;
+		}
+	}
+}

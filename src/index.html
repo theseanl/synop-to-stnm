@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="description" content="Crawls SYNOP reports, and draws station models based on them." />
+	<!-- iOS specifics -->
+	<link rel="apple-touch-icon" sizes="192x192" href="/static/icon_192.png">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<!-- iOS specifics end -->
+	<link rel="manifest" href="/static/manifest.json">
+	<title>Station Model Drawer</title>
+	<link href="https://fonts.googleapis.com/css?family=Playfair+Display+SC" rel="stylesheet">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/solid.css"
+		integrity="sha384-QokYePQSOwpBDuhlHOsX0ymF6R/vLk/UQVz3WHa6wygxI5oGTmDTv8wahFOSspdm" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/fontawesome.css"
+		integrity="sha384-vd1e11sR28tEK9YANUtpIOdjGW14pS87bUBuOIoBILVWLFnS+MCX9T6MMf0VdPGq" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glidejs@2.1.0/dist/css/glide.core.min.css">
+	<link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+
+	<div id="container" class="transition-all">
+		<script type="text/javascript">
+			if (document.documentMode <= 11) { window.stop(); container.innerHTML = "<div>This website does not work with Internet Explorer. Please visit with more recent browsers."; }
+		</script>
+		<div id="logo" class="transition-all">Station Model Drawer</div>
+		<div id="searchbar__container" class="transition-all">
+			<input id="searchbar" class="transition-all" type="text" placeholder="Enter station numbers here" />
+			<div id="datebar__container" class="transition-all">
+				<input id="datebar" class="transition-all" type="text" placeholder="Time in UTC" />
+				<button class="transition-all" type="submit">
+					<i class="fas fa-drafting-compass"></i>
+					<i class="fas fa-spinner"></i>
+				</button>
+			</div>
+		</div>
+		<div id="messageArea__wrapper" class="transition-all">
+			<div id="messageArea" class="transition-all"></div>
+		</div>
+		<div id="queries__container" class="transition-all">
+		</div>
+		<div id="report">
+		</div>
+	</div>
+	<div id="carousel">
+		<div class="glide">
+			<div class="glide__track" data-glide-el="track">
+				<div id="slideRoot" class="glide__slides">
+				</div>
+			</div>
+			<div class="glide__arrows" data-glide-el="controls">
+				<div id="left-arrow" class="arrow arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+					<img class="arrow-svg" src="/static/round-arrow_back_ios-24px.svg" width="100%" height="30px"
+						draggable="false"></img>
+				</div>
+				<div class="arrow arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+					<img class="arrow-svg" src="/static/round-arrow_forward_ios-24px.svg" width="100%" height="30px"
+						draggable="false"></img>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<img src="/static/round-arrow_back-24px.svg" width="30" height="30" draggable="false" id="back"></img>
+<!--
+	<div id="debug_area" style="position:absolute; left: 10px; top:10px;">
+		<script type="text/javascript">
+			window.addEventListener('error', (evt) => {
+				debug_area.innerHTML += evt.message;
+			})
+		</script>
+	</div>
+	-->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@glidejs/glide@3.3.0"></script>
+	<script type="text/javascript" src="/static/timeago.min.js"></script>
+	<script type="text/javascript" src="/index.js"></script>
+	<script defer type="text/javascript" src="/static/wxSym.js"></script>
+</body>
+
+</html>

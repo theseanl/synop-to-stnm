@@ -1,0 +1,31 @@
+@import './variables.css';
+
+body {
+	background-color: var(--main-bg-color);
+}
+
+#container {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	overflow: hidden;
+	background-size: cover;
+	background-color: var(--main-bg-color);
+	body.collapsed>& {
+		height: var(--container-height-collapsed);
+	}	
+}
+
+#logo {
+	font: 700 var(--logo-font-size) 'Playfair Display SC', serif;
+	line-height: 3em;
+	user-select: none;
+
+	body.collapsed & {
+		line-height: 0px;
+		opacity: 0;
+	}
+}

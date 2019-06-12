@@ -1,0 +1,21 @@
+#report {
+	display: none;
+	margin-top: 20px;
+	max-width: 70vw;
+	font-size: 20px;
+	color: #dddddd;
+	background-color: #444444;
+	text-shadow: 1px 1px 1px #555;
+	background-clip: text;
+	
+	body.collapsed & {
+		display: block;
+		& > .highlighted {
+			display: inline;
+			color: #7a7362;
+			margin: 0;
+			padding: 0;
+		}
+	}
+}
+

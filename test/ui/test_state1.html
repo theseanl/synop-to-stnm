@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	<link href="https://fonts.googleapis.com/css?family=Playfair+Display+SC" rel="stylesheet">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/solid.css" integrity="sha384-QokYePQSOwpBDuhlHOsX0ymF6R/vLk/UQVz3WHa6wygxI5oGTmDTv8wahFOSspdm" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/fontawesome.css" integrity="sha384-vd1e11sR28tEK9YANUtpIOdjGW14pS87bUBuOIoBILVWLFnS+MCX9T6MMf0VdPGq" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	<style>
+		html,
+		body {
+			width: 100vw;
+			height: 100vh;
+			margin: 0;
+			font-family: 'Optima', sans-serif
+		}
+
+		#container {
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+			overflow: hidden;
+			background-size: cover;
+			background-color: #efe0b9;
+		}
+		
+		#logo {
+			font: 700 48px 'Playfair Display SC', serif;
+			line-height: 150px;
+		}
+		#searchbar_container {
+			display: flex;
+		}
+		#searchbar {
+			width: 70vw;
+			max-width: 500px;
+			font: 24px 'Optima', sans-serif;
+			border: 2px solid;
+			background-color: #eeeeee;
+			padding: 15px;
+			border-radius: 0;
+			background: rgba(200, 200, 200, 0.2);
+		}
+		#searchbar::placeholder {
+			color: #333333;
+			opacity: 0.5;
+		}
+		#searchbar + button {
+		border-width: 2px 2px 2px 0;
+		border-style: solid;
+		border-color: black;
+		text-align:center;
+			font-size: 24px;
+			cursor: pointer;
+			width: 12px;
+			background-color: black;
+			color: white;
+		}
+		.fa-drafting-compass {
+			margin: 0 0 0 -11.5px;
+		}
+		
+		#queries_container {
+			width: 70vw;
+			max-width: 500px;
+			height: 200px;
+			padding: 50px 0 0 0;
+			overflow:visible;
+		}
+		
+		.query {
+			display: flex;
+			margin: 0 0 20px 0;
+			font-size: 18px;
+			justify-content: space-between;
+		}
+		.query_date, .query_delete {
+			display:inline;
+		}
+		.query_delete {
+				margin-left: 20px;
+		}
+		.query_delete > img {
+			vertical-align: text-bottom;
+			padding-bottom:1px;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div id="logo">Station Model Drawer</div>
+<!-- 		<div id="logo">STNMit!</div> -->
+		<form id="searchbar_container">
+			<input id="searchbar" placeholder="Enter station numbers here"/>
+			<button type="submit"><i class="fas fa-drafting-compass"></i></button>
+		</form>
+		<div id="queries_container">
+			<div class="query">
+				<div class="query_string">
+					45, 37, 45632-45688		
+				</div>
+				<div>
+					<div class="query_date">
+						3 days ago
+					</div> 
+					<div class="query_delete">
+						<img src="https://material.io/tools/icons/static/icons/outline-clear-24px.svg" width="18" height="18"></img>
+					</div>
+				</div>
+			</div>
+			<div class="query">
+				<div class="query_string">
+					12345
+				</div>
+				<div>
+					<div class="query_date">
+						1 weeks ago
+					</div> 
+					<div class="query_delete">
+						<img src="https://material.io/tools/icons/static/icons/outline-clear-24px.svg" width="18" height="18"></img>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

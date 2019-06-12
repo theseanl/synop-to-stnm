@@ -1,0 +1,52 @@
+:root {
+	--logo-font-size: 48px;		
+	@media (max-width: 600px) {
+		--logo-font-size: 7.5vw;
+	}
+	/**
+	 * Collapsed container contains report texts of variable length;
+	 * collapsed container's height must be varied so that it can contain all the report text
+	 * single letter width: ~10.6px, height: 26px;
+	 * we assume that reports are not more than 140 char long
+	 * estimated line no: 140 * 10.6px / 70vw = 21.2 px/ 1vw;
+	 * less than 700px -> 3 lines;
+	 * less than 500px -> 4 lines;
+	 * less than 400px -> 5 lines;
+	 */
+	--container-height-collapsed: 150px;
+	@media (max-width: 500px) {
+		--container-height-collapsed: 172px;
+	}
+	@media (max-width: 400px) {
+		--container-height-collapsed: 194px;
+	}
+	--carousel-height: calc(100vh - var(--container-height-collapsed));
+	--searchbar-container-width: 70vw {
+		collapsed: 40vw;
+	}
+	--queries-list-width: 70vw;
+	@media (max-width: 600px) {
+		--searchbar-container-width: 100vw {
+			collapsed: 70vw;
+		}
+		--queries-list-width:90vw;
+	}
+
+	--datebar-collapse-scale: 2/3;
+	--datebar-width: 180px {
+		collapsed: calc(var(--datebar-width) * var(--datebar-collapse-scale));
+	}
+	--datebar-container-width: 230px {
+		collapsed: var(--datebar-width-collapsed);
+	}
+	--button-width: 50px;
+	--searchbar-width: calc(var(--searchbar-container-width) - var(--datebar-container-width) - 2px) /* 2px is for border */ {
+		collapsed: calc(var(--searchbar-container-width-collapsed) - var(--datebar-width-collapsed) - 2px);
+	}
+	--main-bg-color: #efe0b9;
+	--carousel-bg-color: #eeeeee;
+	--searchbar-font-size: 24px;
+
+	--searchbar-collapsed-bg-color: #808080;
+}
+

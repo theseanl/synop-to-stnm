@@ -1,0 +1,61 @@
+@font-face {
+	font-family: 'Optima';
+	font-style: normal;
+	font-weight: normal;
+	src: local('Optima'), url('/static/main.woff') format('woff');
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.transition-all {
+	transition: all 300ms ease-in;
+}
+
+html,
+body {
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	font-family: 'Optima', sans-serif;
+	-webkit-tap-highlight-color: transparent;
+	overflow: hidden;
+}
+
+
+input[type="text"] {
+	font-family: 'Optima', sans-serif;
+	background: rgba(200, 200, 200, 0.2);
+	border-width: 0;
+	border-radius: 0;
+	border-style: solid;
+	text-overflow: clip;
+	-webkit-appearance: none; /* remove iOS Safari shadow */
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.09);
+
+	body.collapsed & {
+		box-shadow: none;
+	}
+}
+
+input[type="text"],
+button {
+	margin: 0;
+	&:focus {
+		outline: 0;/* disable chrome default styling */
+	}
+}
+
+input[type="text"]::placeholder {
+	color: #333333;
+	opacity: 0.5;
+	body.collapsed & {
+		visibility: hidden;
+	}
+}
+
+img {
+	user-select: none;
+}
+

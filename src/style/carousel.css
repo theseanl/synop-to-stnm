@@ -1,0 +1,102 @@
+@import './variables.css';
+   
+#carousel {
+	display: flex;
+	width: 100vw;
+	height: var(--carousel-height);
+	background: var(--carousel-bg-color);
+	position: relative;
+	align-items: center;
+	justify-content: center;
+	/**
+	 * Applying inset box-shadows to pseudo element in order to make
+	 * it appear **over** its children.
+	 */
+	&::before {
+		width: 100vw;
+		height: var(--carousel-height);
+		content: '';
+		position: absolute;
+		left: 0px;
+		right: 0px;
+		top: 0px;
+		bottom: 0px;
+		box-shadow: inset 0 5px 10px 2px rgba(153, 153, 153, 1);
+		pointer-events: none;
+		z-index: 2;
+	}
+
+	& .glide {
+		opacity: 0;
+		transition: opacity 300ms ease-out;
+		&__slides {
+			display: flex;
+			height: inherit;
+		}
+		&__slide {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			/**
+			 * Gotta scale 500*500 images when there are not enough space. Just be sure to 
+			 * make appropriate transformation when drawing on the canvas.
+			 * It is fixed to 500px here for mocking up.
+			 */	
+			& > img {
+				width: 500px;
+				height: 500px;
+			}
+			& > .slide--error {
+				margin-top: -60px;
+				height: 60px;
+				max-width: 440px;
+				color: #9b6d50;
+				font: 16px "Trebuchet MS", sans-serif;
+				opacity:.8;
+			}
+		}
+	}
+	&.initialized .glide {
+		opacity: 1;
+	}
+}
+
+.arrow {
+	position: absolute;
+	width: 10vw;
+	max-width: 30px;
+	height: 200px;
+	top: 0;
+	bottom: 0;
+	margin: auto;
+	background-color: rgba(0, 0, 0, 0.5);
+	&--left {
+		left: 0;
+		border-radius: 0 20px 20px 0;
+	}
+	&--right {
+		right : 0;
+		border-radius: 20px 0 0 20px;
+	}
+	&-svg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		margin: auto;
+	}
+}
+
+#back {
+	position:absolute;
+	left: -100px;
+	left: 24px;
+	top: 24px;	
+	opacity: 0;
+	transition: opacity  300ms ease-in;
+	body.collapsed & {
+		opacity:1;
+		left: 24px;	
+	}
+}
+

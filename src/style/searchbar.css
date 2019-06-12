@@ -1,0 +1,114 @@
+@import './variables.css';
+
+#searchbar__container {
+	display: inline-flex;
+	flex-wrap: wrap;                                                            
+	width: var(--searchbar-container-width);
+	align-items: stretch;
+	justify-content: center;
+	border: 1px solid black;
+	
+	body.collapsed & {
+		width: var(--searchbar-container-width-collapsed);
+		color: #777777;
+		border-width: 0px;
+		border-radius: 20px;
+	}
+}
+
+#searchbar {
+	flex: 1 0.1 auto;
+	width: var(--searchbar-width);
+	min-width: 250px; /* Trigger wrap in small browsers */
+	
+	body.collapsed & {
+		border-radius: 20px 0 0 20px;
+		width: var(--searchbar-width-collapsed);
+		min-width: 0px;
+	}
+}
+
+#searchbar,
+#datebar__container {
+	border: 1px solid black;
+	
+	body.collapsed & {
+		border-width: 0;
+	}
+}
+
+#datebar__container {
+	display: flex;
+	align-items: stretch;
+	width: var(--datebar-container-width);
+	overflow: hidden;
+	flex: 1 0 auto;
+	
+	body.collapsed & {
+		width: calc(var(--datebar-container-width-collapsed) - 0px);
+		/*width: 120px;*/
+		border-radius: 0 20px 20px 0;	
+	}
+}
+
+#searchbar__container input[type="text"] {
+	font-size: var(--searchbar-font-size);
+	padding: 15px;
+	
+	body.collapsed & {
+		font-size : calc(var(--searchbar-font-size) * var(--collapsed-searchbar-scale));
+		color: #777777;
+		padding: 5px;
+	}
+}
+
+#datebar {
+	flex: 1 0 auto;
+	width: var(--datebar-width);
+
+ 	body.collapsed & {
+	 	border-radius: 0 20px 20px 0;  		
+		flex-shrink:1;
+		width: var(--datebar-width-collapsed);
+ 	}
+}
+
+#datebar__container button {
+	border: 1px solid black;
+	text-align: center;
+	font-size: var(--searchbar-font-size);
+	cursor: pointer;
+	width: var(--button-width);
+	height: 100%;
+	background-color: black;
+	color: white;
+	padding: 0 0 0 2px; /* Centering FontAwesome icon */
+	
+	body.collapsed & {
+		border-width: 0;
+		border-color: var(--collapsed-searchbar-bg-color);
+		border-radius: 0 20px 20px 0;
+		width: 0;
+		font-size: 0px;
+		background-color: var(--collapsed-searchbar-bg-color);
+		color: var(--collapsed-searchbar-bg-color);
+		padding: 0;
+
+	}
+	/* make loading class toggle icon */
+	&>i:nth-child(2) {
+		display: none;
+	}
+	&.loading>i:first-child {
+		display: none;
+	}
+	&.loading>i:nth-child(2) {
+		display: block;
+		animation: spin 2s linear infinite;
+	}	
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}

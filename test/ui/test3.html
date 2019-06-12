@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	<meta name="format-detection" content="telephone=no" />
+<link href="https://fonts.googleapis.com/css?family=Marcellus" rel="stylesheet">
+	
+	<link href="https://fonts.googleapis.com/css?family=Playfair+Display+SC" rel="stylesheet">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/solid.css"
+		integrity="sha384-QokYePQSOwpBDuhlHOsX0ymF6R/vLk/UQVz3WHa6wygxI5oGTmDTv8wahFOSspdm" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/fontawesome.css"
+		integrity="sha384-vd1e11sR28tEK9YANUtpIOdjGW14pS87bUBuOIoBILVWLFnS+MCX9T6MMf0VdPGq" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glidejs@2.1.0/dist/css/glide.core.min.css">
+	<style>
+		:root {
+			--logo-font-size: 48px;		
+			/**
+			 * Collapsed container contains report texts of variable length;
+			 * collapsed container's height must be varied so that it can contain all the report text
+			 * single letter width: ~10.6px, height: 26px;
+			 * we assume that reports are not more than 140 char long
+			 * estimated line no: 140 * 10.6px / 70vw = 21.2 px/ 1vw;
+			 * less than 700px -> 3 lines;
+			 * less than 500px -> 4 lines;
+			 * less than 400px -> 5 lines;
+ 			 */
+			--collapsed-container-height: 150px;
+			--carousel-height: calc(100vh - var(--collapsed-container-height));
+		
+			--searchbar-container-width: 70vw;
+			--collapsed-searchbar-container-width: 40vw;
+		}
+		@media screen and (max-width: 600px) {
+			:root {
+				--logo-font-size: 7.5vw;
+				--searchbar-container-width: 100vw;
+				--collapsed-searchbar-container-width: 70vw;
+			}
+		}
+		@media screen and (max-width: 700px) {
+			:root {
+				--collapsed-container-height: 176px;
+			}
+		}
+		@media screen and (max-width: 500px) {
+			:root {
+				--collapsed-container-height: 202px;
+			}
+		}
+		@media screen and (max-width: 400px) {
+			:root {
+				--collapsed-container-height: 228px;
+			}
+		}
+		:root {
+			
+			--datebar-width: 180px;
+			--collapsed-datebar-scale: 2/3;
+			--collapsed-datebar-width: calc(var(--datebar-width) * var(--collapsed-datebar-scale));
+
+			--datebar-container-width: 230px;
+			--collapsed-datebar-container-width: var(--collapsed-datebar-width);
+
+			--button-width: 50px;
+			--searchbar-width: calc(var(--searchbar-container-width) - var(--datebar-container-width) - 2px); /* 2px is for border */
+
+			--collapsed-searchbar-width: calc(var(--collapsed-searchbar-container-width) - var(--collapsed-datebar-width) - 2px);
+
+			--main-bg-color: #efe0b9;
+			--carousel-bg-color: #eeeeee;
+			--searchbar-font-size: 24px;
+
+			--collapsed-searchbar-bg-color: #808080;
+		}
+		
+		
+		
+		
+		* {
+			box-sizing: border-box;
+		}
+		.transition-all {
+			transition: all 300ms ease-in;
+		}
+
+		.transition-200ms {
+			transition: all 300ms ease-in;
+		}
+
+		body.collapsed .transition-200ms {
+			transition-duration: 200ms;
+			transition-delay: 0;
+		}
+
+		html,
+		body {
+			width: 100vw;
+			height: 100vh;
+			margin: 0;
+			font-family: 'Optima', sans-serif;
+			-webkit-tap-highlight-color: transparent;
+			overflow: hidden;
+		}
+
+		#container {
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+			overflow: hidden;
+			background-size: cover;
+			background-color: var(--main-bg-color);
+		}
+
+		body.collapsed>#container {
+			height: var(--collapsed-container-height);
+		}
+
+		#logo {
+			font: 700 var(--logo-font-size) 'Playfair Display SC', serif;
+			line-height: 3em;
+		}
+
+		body.collapsed #logo {
+			line-height: 0px;
+			opacity: 0;
+		}
+
+		#searchbar__container {
+			display: inline-flex;
+			flex-wrap: wrap;                                                                                                                                                                                                                                                                                                     
+			width: var(--searchbar-container-width);
+			align-items: stretch;
+			justify-content: center;
+			border: 1px solid black;
+			
+
+			/* transition: all 300ms ease-in; */
+		}
+
+		body.collapsed #searchbar__container {
+			width: var(--collapsed-searchbar-container-width);
+			color: #777777;
+			border-width: 0px;
+			border-radius: 20px;
+		}
+
+		input[type="text"] {
+			font-family: 'Optima', sans-serif;
+			background: rgba(200, 200, 200, 0.2);
+			border-width: 0;
+			border-radius: 0;
+			border-style: solid;
+			text-overflow: clip;
+		}
+
+		input[type="text"],
+		button {
+//			box-sizing: border-box;
+			margin: 0;
+		}
+
+		input[type="text"]::placeholder {
+			color: #333333;
+			opacity: 0.5;
+		}
+
+		body.collapsed input[type="text"]::placeholder {
+			visibility: hidden;
+		}
+
+		#searchbar {
+			flex: 1 0.1 auto;
+			width: var(--searchbar-width);
+			min-width: 180px; /* Trigger wrap in small browsers */
+		}
+
+		#searchbar,
+		#datebar__container {
+			border: 1px solid black;
+		}
+
+		body.collapsed #searchbar,
+		body.collapsed #datebar__container {
+			border-width: 0;
+		}
+
+		#searchbar__container input[type="text"] {
+			font-size: var(--searchbar-font-size);
+			padding: 15px;
+		}
+
+		body.collapsed #searchbar__container input[type="text"] {
+			font-size: calc(var(--searchbar-font-size) * var(--collapsed-searchbar-scale));
+			color: #777777;
+			padding: 5px;
+		}
+
+		#datebar__container {
+			display: flex;
+			align-items: stretch;
+			width: var(--datebar-container-width);
+			overflow: hidden;
+			flex: 1 0 auto;
+		}
+
+		body.collapsed #datebar__container {
+			width: calc(var(--collapsed-datebar-container-width) - 0px);
+			border-radius: 0 20px 20px 0;
+		}
+
+		#datebar {
+			flex: 1 0 auto;
+			width: var(--datebar-width);
+			border-radius: 0 20px 20px 0; 
+		}
+
+		body.collapsed #searchbar {
+			border-radius: 20px 0 0 20px;
+			width: var(--collapsed-searchbar-width);
+			min-width: 0px;
+		}
+
+		body.collapsed #datebar {
+			border-radius: 0 20px 20px 0;
+			flex-shrink:1;
+			width: var(--collapsed-datebar-width);
+		}
+		
+		#datebar__container button {
+			border-width: 1px;
+			border-style: solid;
+			border-color: black;
+			text-align: center;
+			font-size: var(--searchbar-font-size);
+			cursor: pointer;
+			width: var(--button-width);
+			height: 100%;
+			background-color: black;
+			color: white;
+			
+			padding: 0 0 0 2px; /* Centering FontAwesome icon */
+		}
+
+		body.collapsed #datebar__container button {
+			border-width: 0;
+			border-color: var(--collapsed-searchbar-bg-color);
+			width: 0;
+			//max-width: 0;
+			background-color: var(--collapsed-searchbar-bg-color);
+			color: var(--collapsed-searchbar-bg-color);
+			padding: 0;
+			border-radius: 0 20px 20px 0;
+		}
+
+		#datebar__container button>i:nth-child(2) {
+			display:none;
+		}
+		#datebar__container button.loading>i:first-child {
+			display:none;
+		}
+		#datebar__container button.loading>i:nth-child(2) {
+			display: block;
+			animation: spin 2s linear infinite;
+		}
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+		/* TODO Fix margin here; */
+		#datebar__container button>i {
+//			margin: 0 0 0 -11.5px;
+		}
+
+		#messageArea__wrapper {
+
+			height: 60px;
+			padding: 0 3px 0 3px;
+			overflow: hidden;
+			filter: drop-shadow(0px 0px 2px rgba(120, 120, 120, 0.75));
+		}
+
+		body.collapsed #messageArea__wrapper {
+			height: 0;
+		}
+
+		#messageArea {
+			display: none;
+			overflow: hidden;
+			text-overflow: ellipses;
+			line-height: 20px;
+			max-width: calc(var(--searchbar-container-width) - 30px);
+			padding: 5px 10px 7px 10px;
+			font-size: 16px;
+			color: #555555;
+			font-family: sans-serif;
+			-webkit-clip-path: polygon(0 0,
+				100% 0,
+				calc(100% - 10px) 100%,
+				10px 100%);
+			animation: showMessage 300ms cubic-bezier(0.39, 0.575, 0.565, 1);
+		}
+
+		@keyframes showMessage {
+			0% {
+				opacity: 0;
+				height: 0;
+				transform: translateY(-10px);
+			}
+
+			100% {
+				opacity: 1;
+				height: 30px; /* TODO: Make this pixel-perfect! */
+			}
+		}
+
+		#messageArea.message--info {
+			display: block;
+			background-color: #a4bee8;
+		}
+
+		#messageArea.message--warning {
+			display: block;
+			background-color: #e2ca7a;
+		}
+
+		body.collapsed #messageArea {
+			font-size: 0;
+			line-height: 0;
+			opacity: 0;
+		}
+		#queries__container {
+			width: 70vw;
+			width: var(--searchbar-container-width);
+			max-width: 500px;
+			height: 200px;
+			overflow: visible;
+		}
+
+		body.collapsed #queries__container {
+			padding: 0 0 0 0;
+			opacity: 0;
+			height: 0px;
+		}
+
+		.query {
+			display: flex;
+			margin: 0 0 20px 0;
+			font-size: 18px;
+			justify-content: space-between;
+		}
+
+		.query__date,
+		.query__delete {
+			display: inline;
+		}
+
+		.query__delete {
+			margin-left: 20px;
+		}
+
+		.query__delete>img {
+			vertical-align: text-bottom;
+			padding-bottom: 1px;
+		}
+
+		#report {
+			display: none;
+			margin-top: 20px;
+			max-width: 70vw;
+			font-size: 20px;
+			color: #dddddd;
+			background-color: #444444;
+			text-shadow: 1px 1px 1px #555;
+			-webkit-background-clip: text;
+			-moz-background-clip: text;
+			background-clip: text;
+		}
+
+		body.collapsed #report {
+			display: block;
+		}
+
+		#carousel {
+			width: 100vw;
+			height: var(--carousel-height);
+			background: var(--carousel-bg-color);
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		body.collapsed #carousel {
+			display: flex;
+		}
+
+		#carousel:before {
+			/**
+			 * Applying inset box-shadows to pseudo element in order to make
+			 * it appear **over** its children.
+			 */
+			width: 100vw;
+			height: var(--carousel-height);
+			content: '';
+			position: absolute;
+			left: 0px;
+			right: 0px;
+			top: 0px;
+			bottom: 0px;
+			box-shadow: inset 0 5px 10px 2px rgba(153, 153, 153, 1);
+			pointer-events: none;
+			z-index: 2;
+		}
+        /**
+         * Gotta scale 500*500 images when there are not enough space. Just be sure to 
+         * make appropriate transformation when drawing on the canvas.
+         * It is fixed to 500px here for mocking up.
+         */
+		.glide__slide > img {
+			width: 500px;
+			height: 500px;
+		}
+		.arrow {
+			position: absolute;
+			width: 10vw;
+			max-width: 30px;
+			height: 200px;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+			background-color: rgba(0, 0, 0, 0.5);
+		}
+
+		.arrow--left {
+			left: 0;
+			border-radius: 0 20px 20px 0;
+		}
+
+		.arrow--right {
+			right: 0;
+			border-radius: 20px 0 0 20px;
+		}
+
+		.arrow-svg {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+		}
+
+		.glide__slide {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		#back {
+			display: none;
+			position: absolute;
+			left: 5px;
+			top: 5px;
+			width: 40px;
+			height: 40px;
+			z-index: 3;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div id="container" class="transition-all">
+		<div id="logo" class="transition-all">Station Model Drawer</div>
+		<div id="searchbar__container" class="transition-all">
+			<input id="searchbar" class="transition-all" type="text" placeholder="Enter station numbers here"
+				value="45, 37, 45632-45688" />
+			<div id="datebar__container" class="transition-all">
+				<input id="datebar" class="transition-all" type="text" placeholder="Time in UTC" />
+					<!--
+						Creating a container with different animation speed for visual effects!
+						button needs to collapse faster than other animations, cuz it has stronger
+						color. but the width it occupies needs to collapse in a similar speed.
+					 -->
+				<button class="transition-all" type="submit">
+					<i class="fas fa-drafting-compass"></i>
+					<i class="fas fa-spinner"></i>
+				</button>
+			</div>
+		</div>
+		<div id="messageArea__wrapper" class="transition-all">
+			<div id="messageArea" class="transition-all">Your query matched no reports.</div>
+		</div>
+		<div id="queries__container" class="transition-all">
+			<div class="query">
+				<div class="query__string">
+					45, 37, 45632-45688 (09/09/2009 0AM)
+				</div>
+
+				<div>
+					<div class="query__date">
+						3 days ago
+					</div>
+					<div class="query__delete">
+						<img src="https://material.io/tools/icons/static/icons/outline-clear-24px.svg" width="18"
+							height="18"></img>
+					</div>
+				</div>
+			</div>
+			<div class="query">
+				<div class="query__string">
+					12345 (Dec 20, 12, 03)
+				</div>
+				<div>
+					<div class="query__date">
+						2 weeks ago
+					</div>
+					<div class="query__delete">
+						<img src="https://material.io/tools/icons/static/icons/outline-clear-24px.svg" width="18"
+							height="18"></img>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="report">
+AAXX 04201 08040 25/66 /0610 10120 20083 39885 40159 53001 333 55301 58005 60005 91013 90710 91116==
+		</div>
+	</div>
+	<div id="carousel">
+		<div class="glide">
+			<div class="glide__track" data-glide-el="track">
+				<div class="glide__slides">
+					<div class="glide__slide">
+						<img src="https://dummyimage.com/500x500/aaaaaa/000000.png"></img>
+					</div>
+					<div class="glide__slide">
+						<img src="https://dummyimage.com/500x500/aaaaaa/000000.png"></img>
+					</div>
+					<div class="glide__slide">
+						<img src="https://dummyimage.com/500x500/aaaaaa/000000.png"></img>
+					</div>
+					<div class="glide__slide">
+						<img src="https://dummyimage.com/500x500/aaaaaa/000000.png"></img>
+					</div>
+				</div>
+			</div>
+			<div class="glide__arrows" data-glide-el="controls">
+				<div id="left-arrow" class="arrow arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+					<img class="arrow-svg"
+						src="https://material.io/tools/icons/static/icons/round-arrow_back_ios-24px.svg" width="100%"
+						height="30px"></img>
+				</div>
+				<div class="arrow arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+					<img class="arrow-svg"
+						src="https://material.io/tools/icons/static/icons/round-arrow_forward_ios-24px.svg" width="100%"
+						height="30px"></img>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<img src="https://material.io/tools/icons/static/icons/round-arrow_back-24px.svg" width="30" height="30"
+		id="back"></img>
+
+	<div id="trigger" style="position:fixed;left: 50px; top: 100px; width: 20px; height: 20px; border: black solid;">
+	</div>
+	<div id="triggerMessage"
+		style="position:fixed; left: 100px; top: 100px; width: 20px; height: 20px; border: black solid;"></div>
+	<div id="triggerLoading"
+		style="position:fixed; left: 150px; top: 100px; width: 20px; height: 20px; border: black solid;"></div>
+
+
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@glidejs/glide"></script>
+	<script type="text/javascript">
+		window.glider = new Glide('.glide');
+		window.addEventListener('error', evt => {
+			//			trigger.innerHTML += evt.message;
+		});
+	</script>
+	<script>
+		trigger.onclick = function () {document.body.classList.toggle('collapsed')};
+		triggerMessage.onclick = function () {messageArea.classList.toggle('message--warning');};
+		triggerLoading.onclick = function() {document.querySelector('#datebar__container button').classList.toggle('loading'); };
+		document.body.addEventListener('transitionend', (evt) => {
+			let target = evt.target;
+			if (target instanceof Element && target.id === 'container') {
+				if (document.body.classList.contains("collapsed")) {
+					glider.mount();
+				} else {
+					glider.destroy();
+				}
+			}
+		});	 
+	</script>
+
+</body>
+
+</html>
