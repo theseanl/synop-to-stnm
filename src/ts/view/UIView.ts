@@ -10,10 +10,29 @@ export default class UIView {
 	constructor(
 		private doc: Document
 	) {}
-	public readonly fontIsLoaded: Promise<void> = new FontFace(
+
+	private readonly fontIsLoaded: Promise<void> = new FontFace(
 		"American Typewriter",
 		`local(American Typewriter), url(static/sub.woff) format("woff")`
 	).load().then((font) => {this.doc.fonts.add(font);});
+
+	private readonly wxSymIsLoaded:Promise<void> = new Promise((resolve, reject) => {
+		if (typeof wxSym !== 'undefined') resolve();
+		const onLoad = () => {
+			wxSymTag.removeEventListener('load', onLoad);
+			resolve();
+		}
+		const onError = () => {
+			wxSymTag.removeEventListener('error', onError);
+			reject();
+		}
+		wxSymTag.addEventListener('load', onLoad);
+		wxSymTag.addEventListener('error', onError);
+	});
+
+	public readonly resourcesRequiredToPaintIsLoaded:Promise<[void, void]> = Promise.all(
+		[this.fontIsLoaded, this.wxSymIsLoaded]
+	);
 
 	private slideRoot = this.doc.getElementById('slideRoot');
 	private carousel = this.doc.getElementById('carousel');
@@ -230,3 +249,4 @@ export const enum UserMessages {
 	INVALID_BLOCK = "Please provide the request block in a form 111,22000-22999."
 }
 
+declare const wxSymTag:HTMLScriptElement;

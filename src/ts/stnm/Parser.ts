@@ -138,6 +138,9 @@ export default class Parser {
 	private digestappp() {
 		if (this.firstCharIsNot("5")) return;
 		this.parsedData.a = this.report[1];
+		if (this.parsedData.a === "9") {
+			this.raiseParseError(`Unrecognized 5-group "a" value ${this.parsedData.a}.`);
+		}
 		this.parsedData.ppp = this.report.slice(2, 5);
 		this.cut(5);
 	}

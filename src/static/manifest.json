@@ -14,8 +14,8 @@
 		}
 	],
 	"start_url": "/index.html",
-	"background_color": "#3367D6",
+	"background_color": "#efe0b9",
 	"display": "standalone",
-	"scope": "/maps/",
+	"scope": "/",
 	"theme_color": "#efe0b9"
 }

@@ -24,7 +24,7 @@ body {
 }
 
 
-input[type="text"] {
+input[type="text"],input[type="number"] {
 	font-family: 'Optima', sans-serif;
 	background: rgba(200, 200, 200, 0.2);
 	border-width: 0;
@@ -40,6 +40,7 @@ input[type="text"] {
 }
 
 input[type="text"],
+input[type="number"],
 button {
 	margin: 0;
 	&:focus {
@@ -47,7 +48,8 @@ button {
 	}
 }
 
-input[type="text"]::placeholder {
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
 	color: #333333;
 	opacity: 0.5;
 	body.collapsed & {

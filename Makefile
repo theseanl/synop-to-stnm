@@ -74,8 +74,13 @@ deploy:
 	make watch RULE=$(OUT_DIR) & ${DELIVER_SIGINT_TO_WATCH_PS} \
 	make liveserver
 
+deploy-github:
+	rsync -r public/ ../station-model-drawer.github.io
+	cd ../station-model-drawer.github.io && git add . && git commit -S --amend &&\
+	git push -f origin master
+
 clean:
 	rm -rf build_test public deploy
 
-.PHONY: watch liveserver liveserver_test stnmtest uimockup deploy $(OUT_DIR)/static
+.PHONY: watch liveserver liveserver_test stnmtest uimockup deploy $(OUT_DIR)/static deploy-github
 

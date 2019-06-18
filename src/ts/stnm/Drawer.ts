@@ -175,7 +175,7 @@ export default class Drawer {
 	@Drawer.setTransform
 	drawPressureTendency(a: string, ppp: string) {
 		let ctx = this.ctx;
-		if (isNumeric(a)) {
+		if (isNumeric(a) && parseInt(a) < 9) {
 			ctx.save();
 			ctx.translate(2 * Drawer.GRID_SIZE - Drawer.HALF_ICON_SIZE, -Drawer.HALF_ICON_SIZE);
 			wxSym.PressureTendencyCharacteristic.a[a](ctx);
@@ -343,7 +343,7 @@ function reducedFraction(a:number, b:number) {
 
 function isNumeric(str: string | undefined) {
 	if (typeof str !== 'string') return false;
-	return /^\d*$/.test(str);
+	return /^\d+$/.test(str);
 }
 
 function rad(num:number) {

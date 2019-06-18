@@ -51,7 +51,7 @@
 	}
 }
 
-#searchbar__container input[type="text"] {
+#searchbar__container input[type="number"] {
 	font-size: var(--searchbar-font-size);
 	padding: 15px;
 	

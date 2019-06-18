@@ -25,13 +25,13 @@
 
 	<div id="container" class="transition-all">
 		<script type="text/javascript">
-			if (document.documentMode <= 11) { window.stop(); container.innerHTML = "<div>This website does not work with Internet Explorer. Please visit with more recent browsers."; }
+			if (document.documentMode <= 11) {window.stop(); container.innerHTML = "<div>This website does not work with Internet Explorer. Please visit with more recent browsers.";}
 		</script>
 		<div id="logo" class="transition-all">Station Model Drawer</div>
 		<div id="searchbar__container" class="transition-all">
-			<input id="searchbar" class="transition-all" type="text" placeholder="Enter station numbers here" />
+			<input id="searchbar" class="transition-all" type="number" placeholder="Enter station numbers here" />
 			<div id="datebar__container" class="transition-all">
-				<input id="datebar" class="transition-all" type="text" placeholder="Time in UTC" />
+				<input id="datebar" class="transition-all" type="number" placeholder="Time in UTC" />
 				<button class="transition-all" type="submit">
 					<i class="fas fa-drafting-compass"></i>
 					<i class="fas fa-spinner"></i>
@@ -66,7 +66,7 @@
 	</div>
 
 	<img src="/static/round-arrow_back-24px.svg" width="30" height="30" draggable="false" id="back"></img>
-<!--
+	<!--
 	<div id="debug_area" style="position:absolute; left: 10px; top:10px;">
 		<script type="text/javascript">
 			window.addEventListener('error', (evt) => {
@@ -77,8 +77,8 @@
 	-->
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@glidejs/glide@3.3.0"></script>
 	<script type="text/javascript" src="/static/timeago.min.js"></script>
+	<script defer type="text/javascript" src="/static/wxSym.js" id="wxSymTag"></script>
 	<script type="text/javascript" src="/index.js"></script>
-	<script defer type="text/javascript" src="/static/wxSym.js"></script>
 </body>
 
 </html>

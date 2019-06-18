@@ -68,7 +68,7 @@ export default class UIController {
 		this.view.setSearchBarText(block);
 		this.view.setDateBarText(dateExpr);
 		this.model.setCurrentReport(reports);
-		await this.view.fontIsLoaded;
+		await this.view.resourcesRequiredToPaintIsLoaded;
 		this.view.drawCanvasesFromReport(reports);
 		await this.view.collapseSearchBar();
 		this.renderQueriesList();
