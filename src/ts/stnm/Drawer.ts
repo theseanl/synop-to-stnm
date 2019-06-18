@@ -330,7 +330,8 @@ function reducedFraction(a:number, b:number) {
 		a = a / 2; b = b / 2;
 	}
 	let i = 0;
-	while (a > b) {
+	while (a >= b) {
+		i++;
 		a = a - b;
 	}
 	let output = [];
