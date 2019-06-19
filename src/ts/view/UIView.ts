@@ -3,20 +3,24 @@ import Parser from '../stnm/Parser';
 import {IStorageHistoryEntity} from '../model/UIModel';
 import EventEmitter from '../shared/EventEmitter';
 import CanvasPool from './CanvasPool';
+import {IReadOnlyBitMask} from '../shared/BitMask';
 import Glide from '@glidejs/glide';
 import * as timeago from 'timeago.js';
 
 export default class UIView {
 	constructor(
 		private doc: Document
-	) {}
+	) {
+		this.updateCanvasSize();
+		this.updateCanvasSizeOnResize();
+	}
 
 	private readonly fontIsLoaded: Promise<void> = new FontFace(
 		"American Typewriter",
 		`local(American Typewriter), url(static/sub.woff) format("woff")`
 	).load().then((font) => {this.doc.fonts.add(font);});
 
-	private readonly wxSymIsLoaded:Promise<void> = new Promise((resolve, reject) => {
+	private readonly wxSymIsLoaded: Promise<void> = new Promise((resolve, reject) => {
 		if (typeof wxSym !== 'undefined') resolve();
 		const onLoad = () => {
 			wxSymTag.removeEventListener('load', onLoad);
@@ -30,11 +34,12 @@ export default class UIView {
 		wxSymTag.addEventListener('error', onError);
 	});
 
-	public readonly resourcesRequiredToPaintIsLoaded:Promise<[void, void]> = Promise.all(
+	public readonly resourcesRequiredToPaintIsLoaded: Promise<[void, void]> = Promise.all(
 		[this.fontIsLoaded, this.wxSymIsLoaded]
 	);
 
 	private slideRoot = this.doc.getElementById('slideRoot');
+	private slideIndex = this.doc.getElementById('slideIndex');
 	private carousel = this.doc.getElementById('carousel');
 	private searchbar = <HTMLInputElement>this.doc.getElementById('searchbar');
 	private datebar = <HTMLInputElement>this.doc.getElementById('datebar');
@@ -153,20 +158,42 @@ export default class UIView {
 		this.queriesArea.querySelectorAll('.query__delete').forEach(deleteEventEmitter.install, deleteEventEmitter);
 	}
 
+	/**
+	 * Default canvas size is 400, but it is too large for smartphones with smaller width.
+	 * For such cases, canvas must be shrinked to available size, which is available width
+	 * minus arrow size, with some grace which is possible because canvas image does not
+	 * occupy the full width of the canvas.
+	 */
 	private static readonly CANVAS_SIZE = 400;
-	private CANVAS_SIZE = (() => {
+	private CANVAS_SIZE: number;
+	private updateCanvasSize = () => {
 		const width = this.doc.defaultView.innerWidth;
-		const arrowWidth = Math.min(width / 10, 30);
-		return Math.min(400, width - 2 * arrowWidth + 20/* grace */);
-	})()
-	private pool = new CanvasPool(this.doc, this.CANVAS_SIZE, this.CANVAS_SIZE);
-	drawCanvasesFromReport(reports: Readonly<string[]>) {
+		const arrowWidth = Math.min(width / 10, 30); /* Duplication of a logic in CSS */
+		const canvasSize = Math.min(UIView.CANVAS_SIZE, width - 2 * arrowWidth + 20/* grace */);
+
+		this.CANVAS_SIZE = canvasSize;
+		this.pool.setCanvasSize(canvasSize, canvasSize);
+		this.doc.documentElement.style.setProperty('--canvas-size', canvasSize + 'px');
+	}
+	private updateCanvasSizeOnResize() {
+		const view = this.doc.defaultView;
+		view.addEventListener('resize', this.updateCanvasSize);
+		view.addEventListener('orientationchange', this.updateCanvasSize);
+	}
+
+	private pool = new CanvasPool(this.doc);
+	drawCanvasesFromReport(
+		reports: Readonly<string[]>,
+		marked: IReadOnlyBitMask,
+		selectEventEmitter: EventEmitter
+	) {
 		// Creates a canvas, draw station model one by one.
 		for (let i = 0, l = reports.length; i < l; i++) {
 			let wrapper = this.doc.createElement('div');
 			wrapper.classList.add('glide__slide');
 			this.slideRoot.appendChild(wrapper);
 			/**
+			 * Gets the canvas, append it to the wrapper.
 			 * TODO: if canvas creation fails, maybe notify users about it
 			 * and lazyload canvases. Before that, fill slides with dummy images.
 			 */
@@ -182,19 +209,55 @@ export default class UIView {
 				continue;
 			}
 
+			// Draw on the canvas
 			const parser = new Parser(reports[i]);
-			let parsedData = parser.parse(true /* Gracefully fail on errors */);
+			let parsedData = parser.parse(true /* Flag to gracefully fail on errors */);
 
 			const drawer = new Drawer(renderingContext,
 				this.CANVAS_SIZE / 2, this.CANVAS_SIZE / 2, this.CANVAS_SIZE / UIView.CANVAS_SIZE);
 			drawer.drawFromParsedData(parsedData);
 
+			// Attach error messages if needed
 			let errors = parser.getParseErrors();
 			if (errors.length) {
 				wrapper.appendChild(this.getCanvasErrorBoxNode(errors.join(' ')));
 			}
-		}
 
+			// Attach check marks for marked drawings
+			if (marked.hasIndex(i)) {
+				this.markSlide(wrapper);
+			}
+
+			// Attach event listeners
+			selectEventEmitter.install(wrapper, i);
+		}
+	}
+	renderSlideCounter(currentIndex: number, total: number, markedTotal?: number) {
+		let innerHTML = `<span>${currentIndex}/${total} </span>`;
+		if (markedTotal) {
+			innerHTML += `<span class="slide__index--marked">${markedTotal}&#10003;</span>`
+		}
+		this.slideIndex.innerHTML = innerHTML;
+	}
+	toggleMarkState(slideIndex: number) {
+		let slideWrapper = this.slideRoot.children[slideIndex];
+		let isMarked = slideWrapper.classList.contains('marked');
+		if (isMarked) {
+			UIView.unmarkSlide(slideWrapper);
+		} else {
+			this.markSlide(slideWrapper);
+		}
+	}
+	private static CHECK_SVG_CLASSNAME = 'slide--check'
+	private static MARKED_CLASSNAME = 'marked';
+	private markSlide(slideWrapper: Element) {
+		slideWrapper.appendChild(this.getCheckSvgNode());
+		slideWrapper.classList.add('marked');
+	}
+	private static unmarkSlide(slideWrapper: Element) {
+		let check = slideWrapper.getElementsByClassName(UIView.CHECK_SVG_CLASSNAME)[0];
+		slideWrapper.removeChild(check);
+		slideWrapper.classList.remove(UIView.MARKED_CLASSNAME);
 	}
 	private getCanvasErrorBoxNode(msg: string): Element {
 		let div = this.doc.createElement('div');
@@ -202,6 +265,13 @@ export default class UIView {
 		div.textContent = msg;
 		div.style.transform = `scale(${this.CANVAS_SIZE / UIView.CANVAS_SIZE})`
 		return div;
+	}
+	private static checkSvgUrl = "/static/check.svg"
+	private getCheckSvgNode(): Element {
+		let img = this.doc.createElement('img');
+		img.classList.add(UIView.CHECK_SVG_CLASSNAME);
+		img.src = UIView.checkSvgUrl;
+		return img;
 	}
 	clearCarousel() {
 		if (this.glide) this.glide.destroy();
@@ -220,11 +290,17 @@ export default class UIView {
 			this.carousel.classList.toggle('initialized', true);
 		});
 		glide.on('move.after', () => {
-			onMove(this.glide.index);
+			let index = this.glide.index;
+			if (typeof index !== 'number') return;
+			onMove(index);
 		});
 		glide.mount();
 	}
-
+	moveGlider(page: number) {
+		if (!this.glide) return;
+		if (this.glide.index === page) return;
+		this.glide.go(`=${page}`);
+	}
 	private static readonly MESSAGE_INFO = 'message--info';
 	private static readonly MESSAGE_WARNING = 'message--warning';
 
@@ -249,4 +325,4 @@ export const enum UserMessages {
 	INVALID_BLOCK = "Please provide the request block in a form 111,22000-22999."
 }
 
-declare const wxSymTag:HTMLScriptElement;
+declare const wxSymTag: HTMLScriptElement;

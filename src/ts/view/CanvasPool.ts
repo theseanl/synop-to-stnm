@@ -5,10 +5,10 @@
 export default class CanvasPool {
 	private contextsInUse: CanvasRenderingContext2D[] = [];
 	private contextsAvailable: CanvasRenderingContext2D[] = [];
+	private width: number
+	private height: number
 	constructor(
-		private doc: Document,
-		private width: number,
-		private height: number
+		private doc: Document
 	) {}
 	/**
 	 * returns null if canvas creation fails
@@ -17,10 +17,11 @@ export default class CanvasPool {
 		let ctxt: CanvasRenderingContext2D;
 		if (this.contextsAvailable.length > 0) {
 			ctxt = this.contextsAvailable.pop();
+			// Requested canvas size may have been updated.
+			this.setCanvasWidth(ctxt.canvas);
 		} else {
 			let canvas = this.doc.createElement('canvas');
-			canvas.width = this.width;
-			canvas.height = this.height;
+			this.setCanvasWidth(canvas);
 			ctxt = canvas.getContext('2d');
 			if (ctxt === null) return null;
 		}
@@ -40,11 +41,19 @@ export default class CanvasPool {
 		}
 		this.contextsAvailable.unshift(ctxt);
 	}
+	setCanvasSize(width: number, height: number) {
+		this.width = width;
+		this.height = height;
+	}
+	private setCanvasWidth(canvas: HTMLCanvasElement) {
+		canvas.width = this.width;
+		canvas.height = this.height;
+	}
 	private static clearCanvas(ctxt: CanvasRenderingContext2D) {
 		ctxt.setTransform(1, 0, 0, 1, 0, 0);
 		ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height);
 	}
-	getCurrentActiveCanvasCount():number {
+	getCurrentActiveCanvasCount(): number {
 		return this.contextsInUse.length;
 	}
 }

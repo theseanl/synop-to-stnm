@@ -8,6 +8,7 @@
 	position: relative;
 	align-items: center;
 	justify-content: center;
+	flex-direction:column;
 	/**
 	 * Applying inset box-shadows to pseudo element in order to make
 	 * it appear **over** its children.
@@ -38,14 +39,9 @@
 			align-items: center;
 			justify-content: center;
 			flex-direction: column;
-			/**
-			 * Gotta scale 500*500 images when there are not enough space. Just be sure to 
-			 * make appropriate transformation when drawing on the canvas.
-			 * It is fixed to 500px here for mocking up.
-			 */	
 			& > img {
-				width: 500px;
-				height: 500px;
+				width: 400px;
+				height: 400px;
 			}
 			& > .slide--error {
 				margin-top: -60px;
@@ -55,10 +51,27 @@
 				font: 16px "Trebuchet MS", sans-serif;
 				opacity:.8;
 			}
+			& > .slide--check {
+				width: 30px;
+				height: 30px;
+				margin-top: -30px;
+				margin-left: calc(var(--canvas-size) - 30px); /* Use css variables? */
+			}
 		}
 	}
 	&.initialized .glide {
 		opacity: 1;
+	}
+}
+
+#slideIndex {
+	margin-top:calc(-1 * var(--available-margin-around-canvas));
+	height: var(--available-margin-around-canvas);
+	font: normal 18px "Palatino", sans-serif;		
+	color: #777777;
+	letter-spacing: .2rem;
+	& .slide__index--marked{
+		color: #78e076;
 	}
 }
 

@@ -1,7 +1,9 @@
 ifdef PROD
 OUT_DIR=public
+POSTCSS_CONF=src/style/config/prod/
 else
 OUT_DIR=public-dev
+POSTCSS_CONF=src/style/config/dev/
 endif
 
 DEST_GUARD=@mkdir -p $(OUT_DIR)/static
@@ -11,10 +13,10 @@ src/static/wxSym.js: src/third_party/WorldWeatherSymbols.js
 	$(DEST_GUARD)
 	node script/transform_svg_to_canvas_output.js
 
-$(OUT_DIR)/index.css: $(shell find src/style -name "*.css")
+$(OUT_DIR)/index.css: $(shell find src/style -name "*.css") $(shell find src/style/config -name "*.js")
 	$(DEST_GUARD)
 	@echo "Compiling public/index.css..."
-	postcss src/style/index.css -o $(OUT_DIR)/index.css --config src/style	
+	postcss src/style/index.css -o $(OUT_DIR)/index.css --config $(POSTCSS_CONF)
 	@echo "done."
 
 

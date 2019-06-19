@@ -1,3 +1,5 @@
+import {BitMask, IBitMask, IReadOnlyBitMask} from '../shared/BitMask';
+
 /**
  * Represents a JSON-type string stored in `h.0`, `h.1`, .. keys in the localStorage.
  */
@@ -17,6 +19,9 @@ export declare interface IStorageHistoryEntity {
  * curr: {
  *     id: current page of the entity "id"
  * }
+ * mark: {
+ *     id: array of bitmask of marked indices, 32-bits
+ * }
  */
 export default class UIModel {
 	private storage = window.localStorage;
@@ -25,6 +30,7 @@ export default class UIModel {
 	private static readonly STR_CURR_KEY = "curr";
 	private static readonly STR_ID_KEY = "id";
 	private static readonly STR_REP_KEY = "rep";
+	private static readonly STR_MARK_KEY = "mark";
 
 	private static getHistoryKey(id: number) {
 		return UIModel.STR_HISTORY_KEY + '.' + String(id);
@@ -35,20 +41,24 @@ export default class UIModel {
 	private static getCurrKey(id: number) {
 		return UIModel.STR_CURR_KEY + '.' + String(id);
 	}
+	private static getMarkKey(id: number) {
+		return UIModel.STR_MARK_KEY + '.' + String(id);
+	}
 
 	constructor() {
-		if (this.storage.getItem(UIModel.STR_ID_KEY) === null) {
-			this.storage.setItem(UIModel.STR_ID_KEY, JSON.stringify([]));
-		}
+		if (this.getIDs() === null) this.setIDs([]);
+	}
+	private getParsedValue(key:string):any {
+		return JSON.parse(this.storage.getItem(key));
+	}
+	private setStringifiedValue(key:string, value:any) {
+		this.storage.setItem(key, JSON.stringify(value));
 	}
 	private getIDs(): number[] {
-		return JSON.parse(this.storage.getItem(UIModel.STR_ID_KEY));
+		return this.getParsedValue(UIModel.STR_ID_KEY);
 	}
 	private setIDs(ids: number[]) {
-		this.storage.setItem(UIModel.STR_ID_KEY, JSON.stringify(ids));
-	}
-	private getID(index: number): number {
-		return this.getIDs()[index];
+		this.setStringifiedValue(UIModel.STR_ID_KEY, ids);
 	}
 	private getLastNthID(index: number): number {
 		let ids = this.getIDs();
@@ -72,15 +82,23 @@ export default class UIModel {
 		return deleted;
 	}
 	private getPage(id: number) {
-		return parseInt(this.storage.getItem(UIModel.getCurrKey(id)));
+		return this.getParsedValue(UIModel.getCurrKey(id));
 	}
 	private setPage(id: number, page: number) {
-		this.storage.setItem(UIModel.getCurrKey(id), JSON.stringify(page));
+		this.setStringifiedValue(UIModel.getCurrKey(id), page);
 	}
 	private getHistory(id: number): IStorageHistoryEntity {
-		return JSON.parse(this.storage.getItem(UIModel.getHistoryKey(id)));
+		return this.getParsedValue(UIModel.getHistoryKey(id));
 	}
-	storeNewReport(block: string, date: string, rep: string[]) {
+	private getMarkBitMask(id: number): number[] {
+		return this.getParsedValue(UIModel.getMarkKey(id));
+	}
+	private setMarkBitMask(id:number, bitMaskArray:ReadonlyArray<number>) {
+		this.setStringifiedValue(UIModel.getMarkKey(id), bitMaskArray);
+	}
+
+	// Returns an index of a newly stored report
+	storeNewReport(block: string, date: string, rep: string[]): number {
 		let id = this.addNewID();
 		let historyEntity: IStorageHistoryEntity = {
 			block, date,
@@ -89,6 +107,7 @@ export default class UIModel {
 		this.storage.setItem(UIModel.getHistoryKey(id), JSON.stringify(historyEntity));
 		this.storage.setItem(UIModel.getReportKey(id), JSON.stringify(rep));
 		this.setPage(id, 0);
+		return id;
 	}
 	private getReportByID(id: number): string[] {
 		return JSON.parse(this.storage.getItem(UIModel.getReportKey(id)));
@@ -96,8 +115,9 @@ export default class UIModel {
 	/**
 	 * Get n-th most recent query's cached reports
 	 */
-	getReportByIndex(n: number): string[] {
-		return this.getReportByID(this.getLastNthID(n));
+	getRecentReportByIndex(n: number): [number, string[]] {
+		let id = this.getLastNthID(n);
+		return [id, this.getReportByID(id)];
 	}
 	/**
 	 * @param n {number} returns nth most recent query.
@@ -122,8 +142,8 @@ export default class UIModel {
 	}
 
 	private fetchingXHR: XMLHttpRequest;
-	private static readonly API_URL = "https://synop-api.herokuapp.com/getsynop?"; 
-	fetchReports(block: string, date: string): Promise<Readonly<string[]>> {
+	private static readonly API_URL = "https://synop-api.herokuapp.com/getsynop?";
+	fetchReports(block: string, date: string): Promise<Readonly<[number, string[]]>> {
 		if (this.fetchingXHR) {
 			this.fetchingXHR.abort();
 			this.fetchingXHR = undefined;
@@ -135,7 +155,7 @@ export default class UIModel {
 			let id = ids[l];
 			let history = this.getHistory(id);
 			if (history.block === block && history.date === date) {
-				return Promise.resolve(this.getReportByID(id));
+				return Promise.resolve([id, this.getReportByID(id)]);
 			}
 		}
 		// Fetch report via API
@@ -150,8 +170,8 @@ export default class UIModel {
 				if (xhr.status === 200) {
 					let reports = xhr.responseText.split('\n');
 					// Store it as a history.
-					this.storeNewReport(block, date, reports);
-					resolve(reports);
+					let id = this.storeNewReport(block, date, reports);
+					resolve([id, reports]);
 				} else {
 					reject(`Error fetching resources: ${xhr.responseText}, ${xhr.status}`);
 				}
@@ -159,14 +179,42 @@ export default class UIModel {
 			xhr.send();
 		})
 	}
+
+	// Current rendered report state methods start
+	private currentReportID: number
 	private currentReportArr: Readonly<string[]>;
-	setCurrentReport(reportArr: Readonly<string[]>) {
-		this.currentReportArr = reportArr;
-	}
+	private currentReportMarkBitMask:IBitMask; 
 	getCurrentReportByIndex(index: number) {
 		return this.currentReportArr[index];
 	}
+	setCurrentReport(index: number, reportArr: Readonly<string[]>) {
+		this.currentReportID = index;
+		this.currentReportArr = reportArr;
+		this.currentReportMarkBitMask = new BitMask(this.getMarkBitMask(index) || []);
+	}
+	getCurrentPage(): number {
+		return this.getPage(this.currentReportID);
+	}
+	setCurrentPage(page: number) {
+		this.setPage(this.currentReportID, page);
+	}
+	toggleCurrentPageMarked(page: number) {
+		this.currentReportMarkBitMask.toggleIndex(page);
+		this.setMarkBitMask(this.currentReportID, this.currentReportMarkBitMask.bitMaskArray);
+	}
+	getTotalReportsCount() {
+		return this.currentReportArr.length;
+	}
+	getMarkedIndexCount() {
+		return this.currentReportMarkBitMask.countBits();
+	}
+	getReadOnlyMarkBitMask():IReadOnlyBitMask {
+		return this.currentReportMarkBitMask;
+	}
 
+	/** Helper static methods start */
+
+	// Validation
 	private static readonly RE_BLOCK = /^(?:\d{1,5}|\d{1,5}\-\d{1,5})(?:\,\d{1,5}|\d{1,5}\-\d{1,5})*$/;
 	static validateBlockExpr(block: string) {
 		return UIModel.RE_BLOCK.test(block);
@@ -182,3 +230,4 @@ export default class UIModel {
 		return true;
 	}
 }
+

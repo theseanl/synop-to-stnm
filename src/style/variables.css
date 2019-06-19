@@ -48,5 +48,8 @@
 	--searchbar-font-size: 24px;
 
 	--searchbar-collapsed-bg-color: #808080;
+
+	--canvas-size:400px; /* This will be set in JS, as calculating it requires max()  */
+	--available-margin-around-canvas: calc((100vh - var(--canvas-size) - var(--container-height-collapsed)) / 2 - 10px/* Grace */);
 }
 

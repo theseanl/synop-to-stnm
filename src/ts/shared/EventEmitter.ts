@@ -1,7 +1,7 @@
-import { isUndef } from './utils';
+import {isUndef} from './utils';
 
 
-type ChannelListener = (channel:number) => void
+export type ChannelListener = (channel: number) => void
 /**
  * One can instantiate it, add several listeners, and pass it to a consumer
  * so that it can `install` to certain EventTargets.
@@ -16,29 +16,35 @@ type ChannelListener = (channel:number) => void
 export default class EventEmitter {
 	protected listeners: Set<ChannelListener> = new Set();
 	protected targetToChannelMap: WeakMap<EventTarget, Set<number>> = new WeakMap();
-	private emit(channel: number) {
+	protected $emit(channel: number) {
 		this.listeners.forEach(listener => {
 			try {
 				listener(channel);
-			} catch (e) { }
+			} catch (e) {}
 		});
 	}
-	addListener(listener: ChannelListener) {
+	$addListener(listener: ChannelListener) {
 		this.listeners.add(listener);
 	}
-	removeListener(listener: ChannelListener) {
+	$removeListener(listener: ChannelListener) {
 		this.listeners.delete(listener);
 	}
 	handleEvent(this: this, evt: Event) {
 		if (!evt.isTrusted) return;
-		let { currentTarget } = evt;
+		let {currentTarget} = evt;
 		let channels = this.targetToChannelMap.get(currentTarget);
 		if (isUndef(channels)) return;
-		channels.forEach(this.emit, this);
+		channels.forEach(this.$emit, this);
 	}
 	constructor(
 		private eventName: string
-	) { }
+	) {}
+	protected installListener(target: EventTarget) {
+		target.addEventListener(this.eventName, this);
+	}
+	protected uninstallListener(target: EventTarget) {
+		target.removeEventListener(this.eventName, this);
+	}
 	install(target: EventTarget, channel: number) {
 		let channels = this.targetToChannelMap.get(target);
 		if (isUndef(channels)) {
@@ -58,3 +64,4 @@ export default class EventEmitter {
 		}
 	}
 }
+
