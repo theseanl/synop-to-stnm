@@ -64,6 +64,13 @@ export default class UIView {
 
 	onDrawButtonClick(handler: () => void) {
 		this.drawButton.addEventListener('click', handler);
+		const runOnEnterKeyPress = (event:KeyboardEvent) => {
+			if (event.keyCode === 13) {
+				handler();
+			}
+		}
+		this.searchbar.addEventListener('keypress',runOnEnterKeyPress);
+		this.datebar.addEventListener('keypress', runOnEnterKeyPress);
 	}
 	toggleDrawButtonLoadingState(toggle: boolean) {
 		this.drawButton.classList.toggle('loading', toggle);
@@ -233,7 +240,7 @@ export default class UIView {
 		}
 	}
 	renderSlideCounter(currentIndex: number, total: number, markedTotal?: number) {
-		let innerHTML = `<span>${currentIndex}/${total} </span>`;
+		let innerHTML = `<span>${currentIndex + 1}/${total} </span>`;
 		if (markedTotal) {
 			innerHTML += `<span class="slide__index--marked">${markedTotal}&#10003;</span>`
 		}

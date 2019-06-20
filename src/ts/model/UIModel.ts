@@ -139,6 +139,7 @@ export default class UIModel {
 		this.storage.removeItem(UIModel.getHistoryKey(id));
 		this.storage.removeItem(UIModel.getReportKey(id));
 		this.storage.removeItem(UIModel.getCurrKey(id));
+		this.storage.removeItem(UIModel.getMarkKey(id));
 	}
 
 	private fetchingXHR: XMLHttpRequest;
