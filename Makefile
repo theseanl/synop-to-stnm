@@ -28,7 +28,7 @@ $(OUT_DIR)/static: $(shell find src/static) node_modules/timeago.js/dist/timeago
 $(OUT_DIR)/index.js: $(shell find src/ts -name "*.ts") src/ts/rollup.config.js src/ts/tscc.spec.json
 	$(DEST_GUARD)
 ifdef PROD
-	tscc -c src/ts
+	yarn tscc -c src/ts
 else
 	rollup -c src/ts/rollup.config.js
 endif

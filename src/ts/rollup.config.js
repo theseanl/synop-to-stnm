@@ -10,7 +10,7 @@ export default {
 	},
 	plugins: [
 		tscc({specFile: "src/ts/tscc.spec.json"}),
-		typescript()
+		typescript({objectHashIgnoreUnknownHack: true})
 	]
 }
 

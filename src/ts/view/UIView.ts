@@ -6,6 +6,9 @@ import CanvasPool from './CanvasPool';
 import {IReadOnlyBitMask} from '../shared/BitMask';
 import Glide from '@glidejs/glide';
 import * as timeago from 'timeago.js';
+import enShort from './timeago_en_short';
+
+timeago.register('en_short', enShort);
 
 export default class UIView {
 	constructor(
@@ -64,12 +67,12 @@ export default class UIView {
 
 	onDrawButtonClick(handler: () => void) {
 		this.drawButton.addEventListener('click', handler);
-		const runOnEnterKeyPress = (event:KeyboardEvent) => {
+		const runOnEnterKeyPress = (event: KeyboardEvent) => {
 			if (event.keyCode === 13) {
 				handler();
 			}
 		}
-		this.searchbar.addEventListener('keypress',runOnEnterKeyPress);
+		this.searchbar.addEventListener('keypress', runOnEnterKeyPress);
 		this.datebar.addEventListener('keypress', runOnEnterKeyPress);
 	}
 	toggleDrawButtonLoadingState(toggle: boolean) {
@@ -109,7 +112,7 @@ export default class UIView {
 	setDisplayedReportText(report: string) {
 		this.reportArea.textContent = report;
 	}
-	private static dateExprToReadableFormat(YYMMDDHH: string) {
+	private static dateExprToReadableFormat(YYMMDDHH: string, short?:boolean) {
 		let yy = parseInt(YYMMDDHH.slice(0, 2));
 		let mm = parseInt(YYMMDDHH.slice(2, 4));
 		let dd = parseInt(YYMMDDHH.slice(4, 6));
@@ -126,18 +129,18 @@ export default class UIView {
 		return Intl.DateTimeFormat('default', {
 			hour12: false,
 			year: '2-digit',
-			month: 'short',
+			month: short ? 'numeric' : 'short',
 			day: 'numeric',
 			hour: 'numeric',
 			timeZone: "UTC",
-			timeZoneName: "short"
+			timeZoneName: short ? undefined : "short" 
 		}).format(date);
 	}
-	private static historyToHTMLTemplate(history: IStorageHistoryEntity, index: number): string {
+	private static historyToHTMLTemplate(history: IStorageHistoryEntity, index: number, short:boolean): string {
 		return `<div class="query" data-index="${index}">` +
 			`<div class="query__string">` +
 			`<div>${history.block}</div>` +
-			`<div>(${UIView.dateExprToReadableFormat(history.date)})</div>` +
+			`<div>(${UIView.dateExprToReadableFormat(history.date, short)})</div>` +
 			`</div>` +
 			`<div>` +
 			`<div class="query__date" datetime="${new Date(history.queryDate).toISOString()}">` +
@@ -154,11 +157,15 @@ export default class UIView {
 		deleteEventEmitter: EventEmitter
 	) {
 		// Render HTML
+		const short = this.doc.defaultView.innerWidth < 500;
 		timeago.cancel();
 		this.queriesArea.innerHTML = historyArr.reduce((acc, cur, i) => {
-			return acc + UIView.historyToHTMLTemplate(cur, i);
+			return acc + UIView.historyToHTMLTemplate(cur, i, short);
 		}, '');
-		timeago.render(this.queriesArea.querySelectorAll('.query__date'));
+		timeago.render(
+			this.queriesArea.querySelectorAll('.query__date'),
+			short ? 'en_short' : 'en_US'
+		);
 		// Add event listeners
 		// recall call signature of EventEmitter.install: (listener:func, channel:number)=>any	
 		this.queriesArea.querySelectorAll('.query__string').forEach(clickEventEmitter.install, clickEventEmitter);
@@ -175,8 +182,12 @@ export default class UIView {
 	private CANVAS_SIZE: number;
 	private updateCanvasSize = () => {
 		const width = this.doc.defaultView.innerWidth;
-		const arrowWidth = Math.min(width / 10, 30); /* Duplication of a logic in CSS */
-		const canvasSize = Math.min(UIView.CANVAS_SIZE, width - 2 * arrowWidth + 20/* grace */);
+		const arrowWidth = Math.min(width * 0.06, 30); /* Duplication of a logic in CSS */
+		const canvasSize = Math.min(
+			UIView.CANVAS_SIZE,
+			width - 2 * arrowWidth + 20/* grace */,
+			this.carousel.clientHeight
+		);
 
 		this.CANVAS_SIZE = canvasSize;
 		this.pool.setCanvasSize(canvasSize, canvasSize);

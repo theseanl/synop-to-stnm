@@ -72,7 +72,7 @@ export default class Drawer {
 		let roundedSpeed = Math.round(speed / 5);
 
 		let ctx = this.ctx;
-		if (roundedSpeed === 0) { // No shaft for wind calm!
+		if (speed === 0) { // No shaft for wind calm!
 			ctx.translate(-32.7, -32.7) // Wind calm svg is not centered, is 65*65
 			wxSym.WindArrowCalm["00"](ctx);
 			return;

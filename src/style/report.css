@@ -1,7 +1,12 @@
 #report {
 	display: none;
+	line-height: 24px;
 	margin-top: 20px;
 	max-width: 70vw;
+	@media (max-width: 500px) {
+		max-width: 85vw;
+	}
+	height: var(--report-area-height);
 	font-size: 20px;
 	color: #dddddd;
 	background-color: #444444;

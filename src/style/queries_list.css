@@ -21,13 +21,11 @@
 	white-space: nowrap;
 
 	&__string > div {
-		@media (min-width: 600px) {
 			display: inline;
 
 			&:first-child {
 				margin-right: 10px;
 			}
-		}
 	}
 	&__date, &__delete {
 		display: inline;

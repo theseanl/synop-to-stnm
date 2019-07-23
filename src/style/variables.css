@@ -6,7 +6,7 @@
 	/**
 	 * Collapsed container contains report texts of variable length;
 	 * collapsed container's height must be varied so that it can contain all the report text
-	 * single letter width: ~10.6px, height: 26px;
+	 * single letter width: ~10.6px, height: 24px;
 	 * we assume that reports are not more than 140 char long
 	 * estimated line no: 140 * 10.6px / 70vw = 21.2 px/ 1vw;
 	 * less than 700px -> 3 lines;
@@ -14,11 +14,14 @@
 	 * less than 400px -> 5 lines;
 	 */
 	--container-height-collapsed: 150px;
+	--report-area-height: 48;
 	@media (max-width: 500px) {
-		--container-height-collapsed: 172px;
+		--container-height-collapsed: 165px;
+		--report-area-height: 72px;
 	}
 	@media (max-width: 400px) {
-		--container-height-collapsed: 194px;
+		--container-height-collapsed: 180px;
+		--report-area-height: 96px;
 	}
 	--carousel-height: calc(100vh - var(--container-height-collapsed));
 	--searchbar-container-width: 70vw {

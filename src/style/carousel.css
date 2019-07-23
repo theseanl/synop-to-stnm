@@ -77,9 +77,10 @@
 
 .arrow {
 	position: absolute;
-	width: 10vw;
+	width: 6vw;
 	max-width: 30px;
 	height: 200px;
+	max-height: 28vh;
 	top: 0;
 	bottom: 0;
 	margin: auto;
