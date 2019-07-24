@@ -19,6 +19,10 @@ export default class UIController {
 		// add listeners
 		this.$view.onDrawButtonClick(this.onDrawButtonClick);
 		this.$view.onBackButtonClick(this.onBackButtonClick);
+		this.$view.onKeyDown(' ', () => {
+			if (!this.model.isCarouselVisible()) return;
+			this.markPageOfCurrentReports(this.model.getCurrentPage());
+		})
 	}
 	// Render recent queries
 	renderQueriesList() {
@@ -62,24 +66,29 @@ export default class UIController {
 			this.displayWarningMessage(String(reason));
 		}
 	}
+	private markPageOfCurrentReports(channel: number) {
+		this.model.toggleCurrentPageMarked(channel);
+		this.$view.toggleMarkState(channel);
+		this.renderSlideCounter(this.model.getCurrentPage());
+	}
 	async renderReports(index: number, block: string, dateExpr: string, reports: Readonly<string[]>) {
 		this.$view.clearCarousel();
 		this.$view.setSearchBarText(block);
 		this.$view.setDateBarText(dateExpr);
+		this.$view.blurSearchBar();
 		this.model.setCurrentReport(index, reports);
 		await this.$view.resourcesRequiredToPaintIsLoaded;
 		const canvasClickEventEmitter = new EventEmitter('click');
 		this.$view.drawCanvasesFromReport(
 			reports,
-			this.model.getReadOnlyMarkBitMask(), 
+			this.model.getReadOnlyMarkBitMask(),
 			canvasClickEventEmitter
 		);
 		canvasClickEventEmitter.$addListener((channel) => {
-			this.model.toggleCurrentPageMarked(channel);
-			this.$view.toggleMarkState(channel);
-			this.renderSlideCounter(this.model.getCurrentPage());
+			this.markPageOfCurrentReports(channel);
 		});
 		await this.$view.collapseSearchBar();
+		this.model.setCarouselIsVisible(true);
 		this.renderQueriesList();
 		this.$view.mountNewGlider(this.onGliderMove);
 		this.renderSlideCounter(0);
@@ -88,7 +97,7 @@ export default class UIController {
 			this.$view.moveGlider(storedPage);
 		}
 	}
-	private renderSlideCounter(index:number) {
+	private renderSlideCounter(index: number) {
 		this.$view.renderSlideCounter(
 			index,
 			this.model.getTotalReportsCount(),
@@ -97,11 +106,12 @@ export default class UIController {
 	}
 	onGliderMove(index: number) {
 		this.$view.setDisplayedReportText(this.model.getCurrentReportByIndex(index));
-		this.renderSlideCounter(index);	
+		this.renderSlideCounter(index);
 		this.model.setCurrentPage(index);
 	}
 	onBackButtonClick() {
 		this.$view.expandSearchBar();
+		this.model.setCarouselIsVisible(false);
 	}
 	onQueryDeleteClick(index: number) {
 		this.model.deleteQueryHistory(index);

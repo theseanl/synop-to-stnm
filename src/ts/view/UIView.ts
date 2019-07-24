@@ -52,6 +52,13 @@ export default class UIView {
 	private backButton = this.doc.getElementById('back');
 	private drawButton = this.datebar.nextElementSibling; // <button> is the next elem of datebar
 
+	onKeyDown(key: string, handler: () => void) {
+		this.doc.addEventListener('keydown', (evt) => {
+			if (evt.key === key) handler();
+
+		});
+	}
+
 	getSearchBarText(): string {
 		return this.searchbar.value;
 	}
@@ -109,10 +116,14 @@ export default class UIView {
 		bodyClassList.toggle(UIView.COLLAPSED, false);
 		return new Promise(this.transitionEndExecutor);
 	}
+	blurSearchBar() {
+		this.searchbar.blur();
+		this.datebar.blur();
+	}
 	setDisplayedReportText(report: string) {
 		this.reportArea.textContent = report;
 	}
-	private static dateExprToReadableFormat(YYMMDDHH: string, short?:boolean) {
+	private static dateExprToReadableFormat(YYMMDDHH: string, short?: boolean) {
 		let yy = parseInt(YYMMDDHH.slice(0, 2));
 		let mm = parseInt(YYMMDDHH.slice(2, 4));
 		let dd = parseInt(YYMMDDHH.slice(4, 6));
@@ -133,10 +144,10 @@ export default class UIView {
 			day: 'numeric',
 			hour: 'numeric',
 			timeZone: "UTC",
-			timeZoneName: short ? undefined : "short" 
+			timeZoneName: short ? undefined : "short"
 		}).format(date);
 	}
-	private static historyToHTMLTemplate(history: IStorageHistoryEntity, index: number, short:boolean): string {
+	private static historyToHTMLTemplate(history: IStorageHistoryEntity, index: number, short: boolean): string {
 		return `<div class="query" data-index="${index}">` +
 			`<div class="query__string">` +
 			`<div>${history.block}</div>` +

@@ -213,6 +213,14 @@ export default class UIModel {
 		return this.currentReportMarkBitMask;
 	}
 
+	private carouselIsVisible:boolean = false;
+	isCarouselVisible(){
+		return this.carouselIsVisible;
+	}
+	setCarouselIsVisible(visible:boolean) {
+		this.carouselIsVisible = visible;
+	}
+
 	/** Helper static methods start */
 
 	// Validation
