@@ -134,3 +134,8 @@ drawer5.drawFromParsedData(new Parser(
 	"AAXX2300/20183="
 ).parse());
 
+// Test that it does not draw missings when 7-group is omitted. Draw it only when it is denoted as '/'.
+const drawer6 = new Drawer(cvs(), 200, 200, 1);
+drawer6.drawWindBarb("7");
+drawer6.drawWeather(undefined, undefined);
+

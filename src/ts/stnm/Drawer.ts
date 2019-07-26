@@ -18,10 +18,10 @@ export default class Drawer {
 	 */
 	constructor(
 		private ctx: CanvasRenderingContext2D,
-		private x:number,
-		private y:number,
-		private scale:number = 1
-	) {	}
+		private x: number,
+		private y: number,
+		private scale: number = 1
+	) {}
 	private setFont(font: string = Drawer.COMMON_FONT) {
 		this.ctx.font = font;
 		this.ctx.textBaseline = "middle";
@@ -30,9 +30,9 @@ export default class Drawer {
 	// A method decorator that does:
 	//  - Before draw, move the pen to (x, y) and scales the canvas.
 	//  - After draw, resets the above transformation.
-	private static setTransform(target:Drawer, prop:string, desc:PropertyDescriptor) {
-		const drawingFunction=desc.value; 
-		desc.value = function(this:Drawer) {
+	private static setTransform(target: Drawer, prop: string, desc: PropertyDescriptor) {
+		const drawingFunction = desc.value;
+		desc.value = function (this: Drawer) {
 			this.ctx.save();
 			this.ctx.translate(this.x, this.y);
 			this.ctx.scale(this.scale, this.scale);
@@ -196,7 +196,10 @@ export default class Drawer {
 		let ctx = this.ctx;
 		ctx.save();
 		ctx.translate(-Drawer.GRID_SIZE - Drawer.HALF_ICON_SIZE, -Drawer.HALF_ICON_SIZE);
-		if (isNumeric(ww)) {
+		if (isUndef(ww)) {
+			// pass - don't draw missing when 7-group is not present. Draw only when it is explicitly
+			// missing, such as "7////".
+		} else if (isNumeric(ww)) {
 			wxSym.PresentWeather.ww[ww](ctx);
 		} else { // Missing
 			wxSym.PresentWeather.ww.DoubleSlash(ctx);
@@ -207,7 +210,9 @@ export default class Drawer {
 		// the offset within the cell.
 		ctx.translate(Drawer.GRID_SIZE - Drawer.HALF_ICON_SIZE + Drawer.GRID_SIZE * (1 / 3),
 			Drawer.GRID_SIZE - Drawer.HALF_ICON_SIZE);
-		if (isNumeric(W1W2)) {
+		if (isUndef(W1W2)) {
+			// pass - don't draw missing when 7-group is not present.
+		} else if (isNumeric(W1W2)) {
 			let W1 = parseInt(W1W2.slice(0, 1));
 			let W2 = parseInt(W1W2.slice(1));
 			let prevWx = W1 > W2 ? W1 : W2; // More significant previous weather
@@ -304,14 +309,14 @@ export default class Drawer {
 /*******************************************************************************/
 // Helper functions for converting visibility codes in SYNOP reports to
 // an expression depicted in station models
-function visCodeToMeter(code:number):number {
+function visCodeToMeter(code: number): number {
 	if (code <= 50) return code * 100;
 	if (code <= 80) return (code - 50) * 1000;
 	if (code <= 89) return (code - 80) * 5000 + 30000;
 	return [0, 50, 200, 500, 1000, 2000, 4000, 10000, 20000, 50000][code - 90];
 }
 
-function meterToReportableMilesExpression(meter:number): string {
+function meterToReportableMilesExpression(meter: number): string {
 	if (meter <= 500 /* 5/16 miles */) return reducedFraction(meter / 100, 16);
 	if (meter <= 3200 /* 2 miles */) return reducedFraction(meter / 200, 8);
 	if (meter <= 4800 /* 3 miles */) return reducedFraction(meter / 400, 4);
@@ -320,11 +325,11 @@ function meterToReportableMilesExpression(meter:number): string {
 }
 
 // Returns the max number that's a multiple of m and is less than n
-function roundToMultiple(n:number, m:number) {
+function roundToMultiple(n: number, m: number) {
 	return Math.floor(n / m) * m;
 }
 // Make a fraction expression that is reduced (by factor of 2)
-function reducedFraction(a:number, b:number) {
+function reducedFraction(a: number, b: number) {
 	a = a | 0; // Round a real number to an integer
 	while ((a % 2 === 0) && (b % 2) === 0) {
 		a = a / 2; b = b / 2;
@@ -347,7 +352,7 @@ function isNumeric(str: string | undefined) {
 	return /^\d+$/.test(str);
 }
 
-function rad(num:number) {
+function rad(num: number) {
 	return num * Math.PI * 2;
 }
 
