@@ -14,7 +14,6 @@
 	"compilerFlags": {
 		"assume_function_wrapper": true,
 		"rewrite_polyfills": false,
-		"language_out": "ECMASCRIPT_2015"
-	},
-	"debug":true
+		"language_out": "ECMASCRIPT_2017"
+	}
 }
