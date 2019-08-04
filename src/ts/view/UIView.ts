@@ -4,6 +4,7 @@ import {IStorageHistoryEntity} from '../model/UIModel';
 import EventEmitter from '../shared/EventEmitter';
 import CanvasPool from './CanvasPool';
 import {IReadOnlyBitMask} from '../shared/BitMask';
+import {debounceAnimation}from '../shared/utils'
 import Glide from '@glidejs/glide';
 import * as timeago from 'timeago.js';
 import enShort from './timeago_en_short';
@@ -14,6 +15,8 @@ export default class UIView {
 	constructor(
 		private doc: Document
 	) {
+		this.setDisplayedReportText = debounceAnimation(this.setDisplayedReportText, this);
+
 		this.updateCanvasSize();
 		this.updateCanvasSizeOnResize();
 	}

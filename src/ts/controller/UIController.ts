@@ -1,7 +1,7 @@
 import UIModel from '../model/UIModel';
 import UIView, {UserMessages} from '../view/UIView';
 import EventEmitter from '../shared/EventEmitter';
-import {isUndef} from '../shared/utils';
+import {isUndef, debounceAnimation} from '../shared/utils';
 
 export default class UIController {
 	constructor(
@@ -10,7 +10,7 @@ export default class UIController {
 	) {
 		this.onDrawButtonClick = this.onDrawButtonClick.bind(this);
 		this.onBackButtonClick = this.onBackButtonClick.bind(this);
-		this.onGliderMove = this.onGliderMove.bind(this);
+		this.onGliderMove = debounceAnimation(this.onGliderMove, this);
 	}
 	private static readonly QUERIES_TO_RENDER = 5;
 	initializeMainPage() {
