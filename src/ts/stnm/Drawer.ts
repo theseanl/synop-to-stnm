@@ -119,15 +119,17 @@ export default class Drawer {
 			ctx.fillText("M", Drawer.HALF_ICON_SIZE, Drawer.HALF_ICON_SIZE);
 		};
 
+		const obscured = nh === 9 || n === 9;
+
 		ctx.save();
 		ctx.translate(-Drawer.HALF_ICON_SIZE, Drawer.GRID_SIZE - Drawer.HALF_ICON_SIZE);
 		if (cl !== null) {
 			if (cl !== 0) {
 				wxSym.CloudLow.CL[cl](ctx);
 			}
-		} else if (true) { // "/" on the low cloud always means missing.
-			// It cannot be shadowed by lower layers.
-			// => draw Missing mark at Cl position
+		} else if (!obscured) {
+			// "/" on the low cloud is valid only when nh and n is "9", which means
+			// the sky is obscured.
 			drawMissing();
 		}
 		ctx.restore();
@@ -138,7 +140,7 @@ export default class Drawer {
 			if (cm !== 0) {
 				wxSym.CloudMedium.CM[cm](ctx);
 			}
-		} else if (nh !== 8 || n !== 8 || cl === null) {
+		} else if (!obscured && (nh !== 8 || n !== 8 || cl === null)) {
 			// For Cm to be obscured by Cl, nh and n must be the OVC and
 			// Cl must be present. => otherwise draw Missing mark at Cm position
 			drawMissing();
@@ -151,7 +153,7 @@ export default class Drawer {
 			if (ch !== 0) {
 				wxSym.CloudHigh.CH[ch](ctx);
 			}
-		} else if (n !== 8 || nh < 7 || (nh < 8 && (cl === 0 || cm === 0))) {
+		} else if (!obscured && (n !== 8 || nh < 7 || (nh < 8 && (cl === 0 || cm === 0)))) {
 			// For Ch to be obscured by Cl or Cm, n must be OVC.
 			// If nh < 7, there is a possibility that Cm is 7 oktas, whence Ch is Missing.
 			// If nh is not OVC and Cl or Cm is not present, Ch cannot be obscured.

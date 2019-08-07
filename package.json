@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@tscc/rollup-plugin-tscc": "^0.2.2",
-    "@tscc/tscc": "^0.2.2",
+    "@tscc/rollup-plugin-tscc": "^0.2.4",
+    "@tscc/tscc": "^0.2.4",
     "@types/css-font-loading-module": "^0.0.2",
     "@types/jquery": "^3.3.29",
     "cssnano": "^4.1.10",

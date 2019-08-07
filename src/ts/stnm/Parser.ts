@@ -29,7 +29,7 @@ export default class Parser {
 	constructor(report: string) {
 		this.report = report.replace(/\s/g, "");
 	}
-	parse(lenient:boolean = false): Readonly<IParsedData> { // throws ParseError
+	parse(lenient: boolean = false): Readonly<IParsedData> { // throws ParseError
 		this.setParseMode(lenient);
 		this.digestBulletinHeader();
 		this.digestYYGGiW();
@@ -49,7 +49,7 @@ export default class Parser {
 		this.digestSectionTwoAndOnwards();
 		return <IParsedData>this.parsedData;
 	}
-	private setParseMode(lenient:boolean) {
+	private setParseMode(lenient: boolean) {
 		if (!lenient) return;
 		this.lenient = true;
 		this.parseErrors = [];
@@ -197,7 +197,7 @@ function truncateString(str: string, maxLength: number): string {
  * This only affects very short malformed reports. Anyway, there are inherent ambiguity in parsing
  * of synop reports. e.g. How to parse `AAXX 23004 20272 30070 82100=`? Does 82100 belongs to
  * Nddff group or 8NhClCmCh group?
- * 
+ *
  * 2. Ideally has to be implemented by reading each chars, collecting them in buffers,
  * so that one can terminate immediately when one encounters "=" character.
  * In practice there won't be any difference except for some badly-malformed reports.

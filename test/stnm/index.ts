@@ -128,7 +128,6 @@ drawer4_1.drawFromParsedData(new Parser(
 })();
 
 // Tests for certain pathological cases - never emit things like "NaN" to the canvas.
-
 const drawer5 = new Drawer(cvs(), 200, 200);
 drawer5.drawFromParsedData(new Parser(
 	"AAXX2300/20183="
@@ -138,4 +137,9 @@ drawer5.drawFromParsedData(new Parser(
 const drawer6 = new Drawer(cvs(), 200, 200, 1);
 drawer6.drawWindBarb("7");
 drawer6.drawWeather(undefined, undefined);
+
+// Test that it does not draw missings for 8-group when Nh is 9, i.e. obscured.
+const drawer7 = new Drawer(cvs(), 200, 200);
+drawer7.drawWindBarb("9");
+drawer7.drawCloudGenera("///", "9", "9", "/");
 
