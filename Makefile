@@ -19,7 +19,6 @@ $(OUT_DIR)/index.css: $(shell find src/style -name "*.css") $(shell find src/sty
 	postcss src/style/index.css -o $(OUT_DIR)/index.css --config $(POSTCSS_CONF)
 	@echo "done."
 
-
 $(OUT_DIR)/static: $(shell find src/static) node_modules/timeago.js/dist/timeago.min.js
 	$(DEST_GUARD)
 	rsync -r src/static/ $(OUT_DIR)/static
@@ -39,7 +38,11 @@ $(OUT_DIR)/index.html: src/index.html
 
 ui: $(OUT_DIR)/index.css $(OUT_DIR)/static
 
-$(OUT_DIR): $(OUT_DIR)/index.css $(OUT_DIR)/static $(OUT_DIR)/index.js $(OUT_DIR)/index.html
+$(OUT_DIR)/sw.js:
+	$(DEST_GUARD)
+	rsync src/sw.js $(OUT_DIR)/sw.js
+
+$(OUT_DIR): $(OUT_DIR)/index.css $(OUT_DIR)/static $(OUT_DIR)/index.js $(OUT_DIR)/index.html $(OUT_DIR)/sw.js
 
 build_test/stnm/index.js: $(shell find src/ts -name "*.ts") $(shell find test/stnm -name "*.ts")
 	$(TEST_DEST_GUARD)

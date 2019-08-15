@@ -10,6 +10,7 @@
 	<link rel="apple-touch-icon" sizes="192x192" href="/static/icon_192.png">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<!-- iOS specifics end -->
+	<meta name="theme-color" content="#efe0b9">
 	<link rel="manifest" href="/static/manifest.json">
 	<title>Station Model Drawer</title>
 	<link href="https://fonts.googleapis.com/css?family=Playfair+Display+SC" rel="stylesheet">
@@ -83,6 +84,10 @@
 	<script type="text/javascript">
 		document.addEventListener('touchmove', function (e) {e.preventDefault();}, {capture: true, passive: false});
 		setTimeout(() => window.scrollTo(0, 1));
+	</script>
+	<script type="text/javascript">
+		if ('serviceWorker' in navigator)
+			addEventListener('load', () => navigator.serviceWorker.register('/sw.js'))
 	</script>
 </body>
 
