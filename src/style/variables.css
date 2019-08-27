@@ -14,7 +14,7 @@
 	 * less than 400px -> 5 lines;
 	 */
 	--container-height-collapsed: 150px;
-	--report-area-height: 48;
+	--report-area-height: 48px;
 	@media (max-width: 500px) {
 		--container-height-collapsed: 165px;
 		--report-area-height: 72px;
