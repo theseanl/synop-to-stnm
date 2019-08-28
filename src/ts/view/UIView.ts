@@ -4,7 +4,7 @@ import {IStorageHistoryEntity} from '../model/UIModel';
 import EventEmitter from '../shared/EventEmitter';
 import CanvasPool from './CanvasPool';
 import {IReadOnlyBitMask} from '../shared/BitMask';
-import {debounceAnimation}from '../shared/utils'
+import {debounceAnimation} from '../shared/utils'
 import Glide from '@glidejs/glide';
 import * as timeago from 'timeago.js';
 import enShort from './timeago_en_short';
@@ -24,7 +24,7 @@ export default class UIView {
 	private readonly fontIsLoaded: Promise<void> = new FontFace(
 		"American Typewriter",
 		`local(American Typewriter), url(static/sub.woff) format("woff")`
-	).load().then((font) => {this.doc.fonts.add(font);});
+	).load().then(font => {this.doc.fonts.add(font);});
 
 	private readonly wxSymIsLoaded: Promise<void> = new Promise((resolve, reject) => {
 		if (typeof wxSym !== 'undefined') resolve();
@@ -44,6 +44,7 @@ export default class UIView {
 		[this.fontIsLoaded, this.wxSymIsLoaded]
 	);
 
+	private container = this.doc.getElementById('container');
 	private slideRoot = this.doc.getElementById('slideRoot');
 	private slideIndex = this.doc.getElementById('slideIndex');
 	private carousel = this.doc.getElementById('carousel');
@@ -91,37 +92,57 @@ export default class UIView {
 	onBackButtonClick(handler: () => void) {
 		this.backButton.addEventListener('click', handler);
 	}
-	private static COLLAPSED = "collapsed";
+	private static readonly COLLAPSED = "collapsed";
+	private static readonly TRANSITION_ALL = "transition-all"
 	/**
 	 * Listens for transition end event caused by collapse/expandSearchbar method calls.
-	 * Many transition events occur simultaneously, the searchbar element was chosen
-	 * among them arbitrarily.
+	 * Upon expection, it turned out that some early "transitioncancel" event is fired before
+	 * the "transitionend" events that we expect are fired, which causes this promise to resolve
+	 * prematurely. The button element and its "width" property was chosen in order to filter out
+	 * such transitioncancel events.
 	 */
 	private transitionEndExecutor = (resolve: (r?: any) => void) => {
 		function onTransitionEnd(this: Element, evt: TransitionEvent) {
 			if (evt.target !== this) return;
+			if (evt.propertyName !== 'width') return;
 			this.removeEventListener('transitionend', onTransitionEnd);
 			this.removeEventListener('transitioncancel', onTransitionEnd);
 			resolve();
 		}
-		this.searchbar.addEventListener('transitionend', onTransitionEnd);
-		this.searchbar.addEventListener('transitioncancel', onTransitionEnd);
+		this.drawButton.addEventListener('transitionend', onTransitionEnd);
+		this.drawButton.addEventListener('transitioncancel', onTransitionEnd);
+	}
+	private static rAFExecutor = (resolve:()=>void) => { requestAnimationFrame(resolve); }
+	private async  transitionEnd() {
+		await new Promise(this.transitionEndExecutor);
+		await new Promise(UIView.rAFExecutor);
 	}
 	collapseSearchBar(): Promise<void> {
+		// We attach "transition-all" class to the container element here, as it has
+		// 100vh width, so otherwise if the window resizes it does not catch up the window
+		// fast enough, leaving white margins below.
+		this.container.classList.toggle(UIView.TRANSITION_ALL, true);
 		let bodyClassList = this.doc.body.classList;
 		if (bodyClassList.contains(UIView.COLLAPSED)) return;
 		bodyClassList.toggle(UIView.COLLAPSED, true);
-		return new Promise(this.transitionEndExecutor);
+		this.disableSearchBar(true);
+		return this.transitionEnd();
 	}
-	expandSearchBar(): Promise<void> {
+	async expandSearchBar(): Promise<void> {
 		let bodyClassList = this.doc.body.classList;
 		if (!bodyClassList.contains(UIView.COLLAPSED)) return;
 		bodyClassList.toggle(UIView.COLLAPSED, false);
-		return new Promise(this.transitionEndExecutor);
+		this.disableSearchBar(false);
+		await this.transitionEnd();
+		// Toggles off the transition effect when the searchbar is expanded.
+			this.container.classList.toggle(UIView.TRANSITION_ALL, false);
 	}
 	blurSearchBar() {
 		this.searchbar.blur();
 		this.datebar.blur();
+	}
+	private disableSearchBar(toggle: boolean) {
+		this.searchbar.disabled = this.datebar.disabled = toggle;
 	}
 	setDisplayedReportText(report: string) {
 		this.reportArea.textContent = report;

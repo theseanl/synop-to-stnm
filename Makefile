@@ -39,8 +39,10 @@ $(OUT_DIR)/index.html: src/index.html
 ui: $(OUT_DIR)/index.css $(OUT_DIR)/static
 
 $(OUT_DIR)/sw.js:
+ifdef PROD
 	$(DEST_GUARD)
 	rsync src/sw.js $(OUT_DIR)/sw.js
+endif
 
 $(OUT_DIR): $(OUT_DIR)/index.css $(OUT_DIR)/static $(OUT_DIR)/index.js $(OUT_DIR)/index.html $(OUT_DIR)/sw.js
 

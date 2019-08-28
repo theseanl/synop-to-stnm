@@ -24,10 +24,15 @@
 </head>
 
 <body>
-
 	<div id="container" class="transition-all">
 		<script type="text/javascript">
-			if (document.documentMode <= 11) {window.stop(); container.innerHTML = "<div>This website does not work with Internet Explorer. Please visit with more recent browsers.";}
+			if (document.documentMode <= 11) {
+				try {window.stop();} catch (e) {document.execCommand("Stop");}
+				container.innerHTML = "<div>This website does not work with Internet Explorer. Please visit with other, recent browsers.";
+			}
+		</script>
+		<script type="text/javascript">
+			document.addEventListener('touchmove', function (e) {e.preventDefault();}, {capture: true, passive: false});
 		</script>
 		<div id="logo" class="transition-all">Station Model Drawer</div>
 		<div id="searchbar__container" class="transition-all">
@@ -82,10 +87,6 @@
 	<script type="text/javascript" src="/static/timeago.min.js"></script>
 	<script defer type="text/javascript" src="/static/wxSym.js" id="wxSymTag"></script>
 	<script type="text/javascript" src="/index.js"></script>
-	<script type="text/javascript">
-		document.addEventListener('touchmove', function (e) {e.preventDefault();}, {capture: true, passive: false});
-		setTimeout(() => window.scrollTo(0, 1));
-	</script>
 	<script type="text/javascript">
 		if ('serviceWorker' in navigator)
 			addEventListener('load', () => navigator.serviceWorker.register('/sw.js'))
