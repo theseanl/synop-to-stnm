@@ -37,6 +37,18 @@ input[type="text"],input[type="number"] {
 	body.collapsed & {
 		box-shadow: none;
 	}
+
+	/* Turn off chrome input spinners */
+	&::-webkit-inner-spin-button,
+	&::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* disable disabled input text color change on Safari */
+	&:disabled {
+		opacity: 1;
+	}
 }
 
 input[type="text"],
@@ -55,13 +67,6 @@ input[type="number"]::placeholder {
 	body.collapsed & {
 		visibility: hidden;
 	}
-}
-
-/* Turn off chrome input spinners */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-	  -webkit-appearance: none;
-	    margin: 0;
 }
 
 img {
