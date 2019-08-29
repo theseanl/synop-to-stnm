@@ -83,7 +83,7 @@ deploy:
 
 deploy-github:
 	rsync -r public/ ../station-model-drawer.github.io
-	cd ../station-model-drawer.github.io && git add . && git commit -S --amend &&\
+	cd ../station-model-drawer.github.io && git add . && git commit --amend &&\
 	git push -f origin master
 
 clean:
