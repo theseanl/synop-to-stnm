@@ -331,7 +331,7 @@ export default class Drawer {
 		// a positive value, otherwise it indicateas a negative value.
 		if (isNumeric(TTT)) {
 			let temp = parseInt(TTT);
-			let dispStr = ((temp & 1) === 0 ? "" : "-") + TTT.slice(0, 2) + '.' + TTT[2];
+			let dispStr = ((temp & 1) === 0 ? "" : "-") + parseInt(TTT.slice(0, 2)) + '.' + TTT[2];
 			ctx.fillText(dispStr, -Drawer.GRID_SIZE, -Drawer.GRID_SIZE);
 		}
 		// Dew point depression is in one tenth celcius; if DD is greator than 50, the dpp is 
