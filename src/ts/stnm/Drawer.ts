@@ -321,7 +321,7 @@ export default class Drawer {
 		if (parseInt(YY) <= 50) {
 			speed = meterPerSecondsToKnots(speed);
 		}
-		this.drawWindShaft(dir, speed);
+		this.drawWindShaft(rad(dir / 360), speed);
 	}
 	@Drawer.setTransform
 	drawTemperatureForUpperAir(TTT: string, DD: string) {
