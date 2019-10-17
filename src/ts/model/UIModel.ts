@@ -1,4 +1,5 @@
 import {BitMask, IBitMask, IReadOnlyBitMask} from '../shared/BitMask';
+import {mandatoryPressureLevels} from '../stnm/Parser';
 
 /**
  * Represents a JSON-type string stored in `h.0`, `h.1`, .. keys in the localStorage.
@@ -48,10 +49,10 @@ export default class UIModel {
 	constructor() {
 		if (this.getIDs() === null) this.setIDs([]);
 	}
-	private getParsedValue(key:string):any {
+	private getParsedValue(key: string): any {
 		return JSON.parse(this.storage.getItem(key));
 	}
-	private setStringifiedValue(key:string, value:any) {
+	private setStringifiedValue(key: string, value: any) {
 		this.storage.setItem(key, JSON.stringify(value));
 	}
 	private getIDs(): number[] {
@@ -93,7 +94,7 @@ export default class UIModel {
 	private getMarkBitMask(id: number): number[] {
 		return this.getParsedValue(UIModel.getMarkKey(id));
 	}
-	private setMarkBitMask(id:number, bitMaskArray:ReadonlyArray<number>) {
+	private setMarkBitMask(id: number, bitMaskArray: ReadonlyArray<number>) {
 		this.setStringifiedValue(UIModel.getMarkKey(id), bitMaskArray);
 	}
 
@@ -143,7 +144,9 @@ export default class UIModel {
 	}
 
 	private fetchingXHR: XMLHttpRequest;
-	private static readonly API_URL = "https://synop-api.herokuapp.com/getsynop?";
+	private static readonly API_HOST = "https://synop-api.herokuapp.com/"
+	private static readonly SYNOP_API_PATH = "getsynop?";
+	private static readonly TEMP_API_PATH = "gettemp?"
 	fetchReports(block: string, date: string): Promise<Readonly<[number, string[]]>> {
 		if (this.fetchingXHR) {
 			this.fetchingXHR.abort();
@@ -159,8 +162,11 @@ export default class UIModel {
 				return Promise.resolve([id, this.getReportByID(id)]);
 			}
 		}
-		// Fetch report via API
-		let url = UIModel.API_URL + "block=" + encodeURIComponent(block) + "&time=" + date;
+		// Fetch report via API. If block ends with "hPa", it means we should fetch upper air data.
+		// otherwise, SYNOP data.
+		let url = blockKinds(block) === ReportKinds.SYNOP ?
+			UIModel.API_HOST + UIModel.SYNOP_API_PATH + "block=" + encodeURIComponent(block) + "&time=" + date :
+			UIModel.API_HOST + UIModel.TEMP_API_PATH + "time=" + date;
 		let xhr = this.fetchingXHR = new XMLHttpRequest();
 		xhr.open("GET", url);
 		return new Promise((resolve, reject) => {
@@ -184,7 +190,7 @@ export default class UIModel {
 	// Current rendered report state methods start
 	private currentReportID: number
 	private currentReportArr: Readonly<string[]>;
-	private currentReportMarkBitMask:IBitMask; 
+	private currentReportMarkBitMask: IBitMask;
 	getCurrentReportByIndex(index: number) {
 		return this.currentReportArr[index];
 	}
@@ -209,15 +215,15 @@ export default class UIModel {
 	getMarkedIndexCount() {
 		return this.currentReportMarkBitMask.countBits();
 	}
-	getReadOnlyMarkBitMask():IReadOnlyBitMask {
+	getReadOnlyMarkBitMask(): IReadOnlyBitMask {
 		return this.currentReportMarkBitMask;
 	}
 
-	private carouselIsVisible:boolean = false;
-	isCarouselVisible(){
+	private carouselIsVisible: boolean = false;
+	isCarouselVisible() {
 		return this.carouselIsVisible;
 	}
-	setCarouselIsVisible(visible:boolean) {
+	setCarouselIsVisible(visible: boolean) {
 		this.carouselIsVisible = visible;
 	}
 
@@ -225,8 +231,13 @@ export default class UIModel {
 
 	// Validation
 	private static readonly RE_BLOCK = /^(?:\d{1,5}|\d{1,5}\-\d{1,5})(?:\,\d{1,5}|\d{1,5}\-\d{1,5})*$/;
+	private static readonly PRESSURE_LEVELS = mandatoryPressureLevels.map(String);
 	static validateBlockExpr(block: string) {
-		return UIModel.RE_BLOCK.test(block);
+		if (UIModel.RE_BLOCK.test(block)) return true;
+		if (blockKinds(block) === ReportKinds.TEMP) {
+			if (UIModel.PRESSURE_LEVELS.includes(block.slice(0, -3))) return true;
+		}
+		return false;
 	}
 	// dateExpr is of the a YYMMDDHH.
 	static validateDateExpr(dateExpr: string) {
@@ -239,4 +250,14 @@ export default class UIModel {
 		return true;
 	}
 }
+
+export function blockKinds(str: string): ReportKinds {
+	return str.endsWith('hPa') ? ReportKinds.TEMP : ReportKinds.SYNOP;
+}
+
+export const enum ReportKinds {
+	SYNOP,
+	TEMP
+}
+
 

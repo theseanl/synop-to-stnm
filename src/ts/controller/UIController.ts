@@ -81,6 +81,7 @@ export default class UIController {
 		const canvasClickEventEmitter = new EventEmitter('click');
 		this.$view.drawCanvasesFromReport(
 			reports,
+			block,
 			this.model.getReadOnlyMarkBitMask(),
 			canvasClickEventEmitter
 		);

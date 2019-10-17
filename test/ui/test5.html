@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	<meta name="format-detection" content="telephone=no" />
+	<link href="https://fonts.googleapis.com/css?family=Playfair+Display+SC" rel="stylesheet">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/solid.css"
+		integrity="sha384-QokYePQSOwpBDuhlHOsX0ymF6R/vLk/UQVz3WHa6wygxI5oGTmDTv8wahFOSspdm" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/fontawesome.css"
+		integrity="sha384-vd1e11sR28tEK9YANUtpIOdjGW14pS87bUBuOIoBILVWLFnS+MCX9T6MMf0VdPGq" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glidejs@2.1.0/dist/css/glide.core.min.css">
+	<link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+
+	<div id="container" class="transition-all">
+		<div id="logo" class="transition-all">Station Model Drawer</div>
+		<div id="searchbar__container" class="transition-all">
+			<input id="searchbar" class="transition-all" type="text" placeholder="Enter station numbers here"
+				value="45, 37, 45632-45688" />
+			<div id="datebar__container" class="transition-all">
+				<input id="datebar" class="transition-all" type="text" placeholder="Time in UTC" />
+				<button class="transition-all" type="submit">
+					<i class="fas fa-drafting-compass"></i>
+					<i class="fas fa-spinner"></i>
+				</button>
+			</div>
+		</div>
+		<div id="messageArea__wrapper" class="transition-all">
+			<div id="messageArea" class="transition-all">Your query matched no reports.</div>
+		</div>
+		<div id="queries__container" class="transition-all">
+			<div class="query">
+				<div class="query__string">
+					<div>45, 37, 45632-45688</div>
+					<div>(09/09/2009 0AM)</div>
+				</div>
+
+				<div>
+					<div class="query__date">
+						3 days ago
+					</div>
+					<div class="query__delete">
+						<img src="/static/outline-clear-24px.svg" width="18" height="18"></img>
+					</div>
+				</div>
+			</div>
+			<div class="query">
+				<div class="query__string">
+					<div>12345</div>
+					<div>(Dec 20, 12, 03)</div>
+				</div>
+				<div>
+					<div class="query__date">
+						2 weeks ago
+					</div>
+					<div class="query__delete">
+						<img src="/static/outline-clear-24px.svg" width="18" height="18"></img>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="report">
+			AAXX 04201 <div class="highlighted">08040</div> 25/66 /0610 10120 20083 39885 40159 53001 333 55301 58005
+			60005 91013 90710 91116==
+		</div>
+	</div>
+	<div id="carousel">
+		<div class="glide">
+			<div class="glide__track" data-glide-el="track">
+				<div id="slideRoot" class="glide__slides">
+					<div class="glide__slide">
+						<img src="http://via.placeholder.com/400x400"></img>
+						<div class="slide--error">This model couldn't be drawn</div>
+					</div>
+					<div class="glide__slide">
+						<img src="http://via.placeholder.com/400x400"></img>
+					</div>
+					<div class="glide__slide marked">
+						<img src="http://via.placeholder.com/400x400"></img>
+						<img class="slide--check" src="/static/check.svg"></img>
+					</div>
+					<div class="glide__slide">
+						<img src="http://via.placeholder.com/400x400"></img>
+					</div>
+				</div>
+			</div>
+			<div class="glide__arrows" data-glide-el="controls">
+				<div id="left-arrow" class="arrow arrow--left glide__arrow glide__arrow--left" data-glide-dir="<">
+					<img class="arrow-svg" src="/static/round-arrow_back_ios-24px.svg" width="100%" height="30px"></img>
+				</div>
+				<div class="arrow arrow--right glide__arrow glide__arrow--right" data-glide-dir=">">
+					<img class="arrow-svg" src="/static/round-arrow_forward_ios-24px.svg" width="100%"
+						height="30px"></img>
+				</div>
+			</div>
+		</div>
+		<div id="slideIndex"><span>1/4 </span><span class="slide__index--marked">3&#10003;</span></div>
+
+	</div>
+
+	<img src="/static/round-arrow_back-24px.svg" width="30" height="30" id="back"></img>
+
+	<div id="trigger" style="position:fixed;left: 50px; top: 100px; width: 20px; height: 20px; border: black solid;">
+	</div>
+	<div id="triggerMessage"
+		style="position:fixed; left: 100px; top: 100px; width: 20px; height: 20px; border: black solid;"></div>
+	<div id="triggerLoading"
+		style="position:fixed; left: 150px; top: 100px; width: 20px; height: 20px; border: black solid;"></div>
+
+
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@glidejs/glide"></script>
+	<script type="text/javascript">
+		window.glider = new Glide('.glide');
+		window.addEventListener('error', evt => {
+			//			trigger.innerHTML += evt.message;
+		});
+	</script>
+	<script>
+		trigger.onclick = function () {document.body.classList.toggle('collapsed')};
+		triggerMessage.onclick = function () {messageArea.classList.toggle('message--warning');};
+		triggerLoading.onclick = function () {document.querySelector('#datebar__container button').classList.toggle('loading');};
+
+		function log(text) {
+			trigger.innerHTML += text + '\n';
+		}
+
+		glider.on('mount.after', () => {
+			carousel.classList.toggle('initialized', true);
+		});
+		document.body.addEventListener('transitionend', (evt) => {
+			let target = evt.target;
+			if (target instanceof Element && target.id === 'container') {
+				if (document.body.classList.contains("collapsed")) {
+					glider.mount();
+				} else {
+					//glider.destroy();
+				}
+			}
+		});	 
+	</script>
+
+</body>
+
+</html>

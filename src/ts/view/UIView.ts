@@ -1,6 +1,6 @@
 import Drawer from '../stnm/Drawer';
-import Parser from '../stnm/Parser';
-import {IStorageHistoryEntity} from '../model/UIModel';
+import SynopParser, {TempParser, Parser} from '../stnm/Parser';
+import {IStorageHistoryEntity, blockKinds, ReportKinds} from '../model/UIModel';
 import EventEmitter from '../shared/EventEmitter';
 import CanvasPool from './CanvasPool';
 import {IReadOnlyBitMask} from '../shared/BitMask';
@@ -112,7 +112,7 @@ export default class UIView {
 		this.drawButton.addEventListener('transitionend', onTransitionEnd);
 		this.drawButton.addEventListener('transitioncancel', onTransitionEnd);
 	}
-	private static rAFExecutor = (resolve:()=>void) => { requestAnimationFrame(resolve); }
+	private static rAFExecutor = (resolve: () => void) => {requestAnimationFrame(resolve);}
 	private async  transitionEnd() {
 		await new Promise(this.transitionEndExecutor);
 		await new Promise(UIView.rAFExecutor);
@@ -135,7 +135,7 @@ export default class UIView {
 		this.disableSearchBar(false);
 		await this.transitionEnd();
 		// Toggles off the transition effect when the searchbar is expanded.
-			this.container.classList.toggle(UIView.TRANSITION_ALL, false);
+		this.container.classList.toggle(UIView.TRANSITION_ALL, false);
 	}
 	blurSearchBar() {
 		this.searchbar.blur();
@@ -237,6 +237,7 @@ export default class UIView {
 	private pool = new CanvasPool(this.doc);
 	drawCanvasesFromReport(
 		reports: Readonly<string[]>,
+		block: string,
 		marked: IReadOnlyBitMask,
 		selectEventEmitter: EventEmitter
 	) {
@@ -263,12 +264,18 @@ export default class UIView {
 			}
 
 			// Draw on the canvas
-			const parser = new Parser(reports[i]);
-			let parsedData = parser.parse(true /* Flag to gracefully fail on errors */);
-
 			const drawer = new Drawer(renderingContext,
 				this.CANVAS_SIZE / 2, this.CANVAS_SIZE / 2, this.CANVAS_SIZE / UIView.CANVAS_SIZE);
-			drawer.drawFromParsedData(parsedData);
+			let parser: Parser<any>;
+			if (blockKinds(block) === ReportKinds.SYNOP) {
+				parser = new SynopParser(reports[i]);
+				let parsedData = parser.parse(true /* Flag to gracefully fail on errors */);
+				drawer.drawFromParsedData(parsedData);
+			} else {
+				parser = new TempParser(reports[i], parseInt(block.slice(0, -3)));
+				let parsedData = parser.parse(true);
+				drawer.drawFromParsedTempData(parsedData);
+			}
 
 			// Attach error messages if needed
 			let errors = parser.getParseErrors();

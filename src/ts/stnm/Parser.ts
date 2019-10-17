@@ -1,5 +1,8 @@
-export interface IParsedData {
+interface _IParsedData {
 	iiIII: string
+}
+
+export interface IParsedData extends _IParsedData {
 	iW: string
 	iR: string
 	iX: string
@@ -22,12 +25,45 @@ export interface IParsedData {
 
 export class ParseError extends Error {}
 
-export default class Parser {
-	private parsedData: Partial<IParsedData> = Object.create(null);
-	private report: string;
-	private lenient: boolean;
+export abstract class Parser<T extends _IParsedData> {
+	protected parsedData: Partial<T> = Object.create(null);
+	protected lenient: boolean;
+	constructor(
+		protected report: string
+	) {}
+	abstract parse(lenient?: boolean): T
+	protected setParseMode(lenient: boolean) {
+		if (!lenient) return;
+		this.lenient = true;
+		this.parseErrors = [];
+	}
+	protected parseErrors: string[];
+	protected raiseParseError(msg: string) {
+		if (this.lenient) this.parseErrors.push(msg);
+		else throw new ParseError(msg);
+	}
+	getParseErrors(): ReadonlyArray<string> {
+		return this.parseErrors;
+	}
+	protected cut(n: number) {
+		this.report = this.report.slice(n);
+	}
+	// Returns wheather the first character in the report is **NOT** equal
+	// to char or not.
+	protected firstCharIsNot(char: string) {
+		return this.report[0] !== char;
+	}
+	protected digestiiIII() {
+		if (!this.firstCharIsNot("=")) return;
+		this.parsedData.iiIII = this.report.slice(0, 5);
+		this.cut(5);
+	}
+}
+
+
+export default class SynopParser extends Parser<IParsedData> {
 	constructor(report: string) {
-		this.report = report.replace(/\s/g, "");
+		super(report.replace(/\s/g, ""));
 	}
 	parse(lenient: boolean = false): Readonly<IParsedData> { // throws ParseError
 		this.setParseMode(lenient);
@@ -49,27 +85,6 @@ export default class Parser {
 		this.digestSectionTwoAndOnwards();
 		return <IParsedData>this.parsedData;
 	}
-	private setParseMode(lenient: boolean) {
-		if (!lenient) return;
-		this.lenient = true;
-		this.parseErrors = [];
-	}
-	private parseErrors: string[];
-	private raiseParseError(msg: string) {
-		if (this.lenient) this.parseErrors.push(msg);
-		else throw new ParseError(msg);
-	}
-	getParseErrors(): ReadonlyArray<string> {
-		return this.parseErrors;
-	}
-	private cut(n: number) {
-		this.report = this.report.slice(n);
-	}
-	// Returns wheather the first character in the report is **NOT** equal
-	// to char or not.
-	private firstCharIsNot(char: string) {
-		return this.report[0] !== char;
-	}
 	private digestBulletinHeader() {
 		let header = this.report.slice(0, 4);
 		this.cut(4);
@@ -82,11 +97,7 @@ export default class Parser {
 		this.parsedData.iW = this.report[4];
 		this.cut(5);
 	}
-	private digestiiIII() {
-		if (!this.firstCharIsNot("=")) return;
-		this.parsedData.iiIII = this.report.slice(0, 5);
-		this.cut(5);
-	}
+
 	private digestiRiXhVV() {
 		if (!this.firstCharIsNot("=")) return;
 		this.parsedData.iR = this.report[0];
@@ -202,4 +213,65 @@ function truncateString(str: string, maxLength: number): string {
  * so that one can terminate immediately when one encounters "=" character.
  * In practice there won't be any difference except for some badly-malformed reports.
  */
+
+
+export interface ITempParseData {
+	iiIII: string
+	YY: string
+	hhh: string
+	TTT: string
+	DD: string
+	ddd: string
+	ff: string
+}
+
+// Consult http://tornado.sfsu.edu/Geosciences/classes/m400/Lab2_files/RadiosondeCode.html
+export class TempParser extends Parser<ITempParseData> {
+	private targetLevel: string;
+	constructor(
+		report: string,
+		pressureLevel: number
+	) {
+		super(report);
+		this.targetLevel = pressureLevelToReportIndicator(pressureLevel);
+		if (!this.targetLevel) throw new Error(`Invalid pressure level ` + pressureLevel);
+	}
+	parse(lenient: boolean = false) {
+		this.setParseMode(lenient);
+		this.digestYYGGiD();
+		this.digestiiIII();
+		this.seekPressureLevel(this.targetLevel);
+		return <ITempParseData>this.parsedData;
+	}
+	private digestYYGGiD() {
+		if (!this.firstCharIsNot("=")) return;
+		// "YY" encodes the date of the observation. If it is greater than 50, its actual value is
+		// YY - 50, and it signifies that the unit of wind speeds is knots. Otherwise, its literal
+		// value is the date and the unit of wind speeds is meter per seconds.
+		this.parsedData.YY = this.report.substr(0, 2);
+		this.cut(5);
+	}
+	private seekPressureLevel(indicator: string) {
+		// seek 5 characaters each, until we meet the presure level indicator
+		while (this.report.substr(0, 2) !== indicator) {
+			// check for report end
+			if (this.report.substr(0, 5) === '51515' || this.report[5] === undefined) {
+				return;
+			}
+			this.cut(15)
+		}
+		this.parsedData.hhh = this.report.substr(2, 3);
+		this.parsedData.TTT = this.report.substr(5, 3);
+		this.parsedData.DD = this.report.substr(8, 2);
+		this.parsedData.ddd = this.report.substr(10, 3);
+		this.parsedData.ff = this.report.substr(13, 2);
+	}
+}
+
+export const mandatoryPressureLevels = [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100];
+
+function pressureLevelToReportIndicator(level: number) {
+	if (!mandatoryPressureLevels.includes(level)) return;
+	return level === 100 ? "00" : String((level / 10) | 0);
+}
 

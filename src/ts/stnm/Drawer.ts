@@ -1,4 +1,4 @@
-import {IParsedData} from './Parser'
+import {IParsedData, ITempParseData} from './Parser'
 import {isUndef} from '../shared/utils';
 
 /**
@@ -52,8 +52,7 @@ export default class Drawer {
 			wxSym.TotalCloudCover.N[N](ctx);
 		}
 	}
-	@Drawer.setTransform
-	drawWindShaft(dd: string, ff: string, iw: string) {
+	drawWindShaftSYNOP(dd: string, ff: string, iw: string) {
 		// There seem to be 2 conventions in denoting wind speeds higher than 100:
 		// In ROKAF documentations, one subtracts 50 from "ff" and adds 50 to "dd".
 		// In documentation from WMO, one puts 99 for "ff" and provide another group
@@ -66,9 +65,13 @@ export default class Drawer {
 			speed += 50;
 		}
 		if (parseInt(iw) < 2) { // iw can be 0, 1, 3, 4; 0, 1 means ff is in meter per sec.
-			speed *= 1.94384; // Conversion constant for m/s to knots
+			speed = meterPerSecondsToKnots(speed);
 		}
 		let dir = rad(dir_deg / 36);
+		this.drawWindShaft(dir, speed);
+	}
+	@Drawer.setTransform
+	drawWindShaft(dir: number, speed: number) {
 		let roundedSpeed = Math.round(speed / 5);
 
 		let ctx = this.ctx;
@@ -298,7 +301,7 @@ export default class Drawer {
 		this.drawStationIndex(data.iiIII);
 		this.drawVisibility(data.VV);
 		this.drawWindBarb(data.N);
-		this.drawWindShaft(data.dd, data.ff, data.iW);
+		this.drawWindShaftSYNOP(data.dd, data.ff, data.iW);
 		this.drawTemperature(data.SnTTT, data.SnTdTdTd);
 		this.drawPressure(data.PPPP);
 		this.drawPressureTendency(data.a, data.ppp);
@@ -306,8 +309,60 @@ export default class Drawer {
 		this.drawWeather(data.ww, data.W1W2);
 		this.drawCloudGenera(data.ClCmCh, data.Nh, data.N, data.h);
 	}
+	drawWindShaftForUpperAir(ddd: string, ff: string, YY: string) {
+		if (!isNumeric(ddd) || !isNumeric(ff)) return;
+		// ddd is in a multiple of 5; if it isn't, the remainder signifies the 100-th digit of ff.
+		let dir = parseInt(ddd);
+		let remainder = dir % 5;
+		dir -= remainder;
+		let speed = parseInt(ff) + 100 * remainder;
+		// YY, representing a day when the observation was taken is greater than 50 when
+		// wind speeds in this observation is in knots. Otherwise it is in meter per seconds.
+		if (parseInt(YY) <= 50) {
+			speed = meterPerSecondsToKnots(speed);
+		}
+		this.drawWindShaft(dir, speed);
+	}
+	@Drawer.setTransform
+	drawTemperatureForUpperAir(TTT: string, DD: string) {
+		let ctx = this.ctx;
+		this.setFont();
+		// TTT is a temperature in one tenth celcius; if the one-tenth digit is even, it indicates
+		// a positive value, otherwise it indicateas a negative value.
+		if (isNumeric(TTT)) {
+			let temp = parseInt(TTT);
+			let dispStr = ((temp & 1) === 0 ? "" : "-") + TTT.slice(0, 2) + '.' + TTT[2];
+			ctx.fillText(dispStr, -Drawer.GRID_SIZE, -Drawer.GRID_SIZE);
+		}
+		// Dew point depression is in one tenth celcius; if DD is greator than 50, the dpp is 
+		// DD - 50 (in 1 celcius unit)
+		if (isNumeric(DD)) {
+			let dpp = parseInt(DD);
+			let dispStr = dpp > 50 ? String(dpp - 50) + '.0' : DD[0] + '.' + DD[1];
+			ctx.fillText(dispStr, -Drawer.GRID_SIZE, Drawer.GRID_SIZE);
+		}
+	}
+	@Drawer.setTransform
+	drawPressureHeight(hhh: string) {
+		if (isNumeric(hhh)) {
+			this.setFont();
+			this.ctx.fillText(hhh, Drawer.GRID_SIZE, 0);
+		}
+	}
+	drawFromParsedTempData(data: Readonly<ITempParseData>) {
+		this.drawStationIndex(data.iiIII);
+		this.drawPressureHeight(data.hhh);
+		this.drawWindBarb("9");
+		this.drawWindShaftForUpperAir(data.ddd, data.ff, data.YY);
+		this.drawTemperatureForUpperAir(data.TTT, data.DD);
+	}
 }
 
+/*******************************************************************************/
+// Helper functions
+function meterPerSecondsToKnots(speed: number) {
+	return speed *= 1.94384; // Conversion constant for m/s to knots
+}
 /*******************************************************************************/
 // Helper functions for converting visibility codes in SYNOP reports to
 // an expression depicted in station models
@@ -352,6 +407,11 @@ function reducedFraction(a: number, b: number) {
 function isNumeric(str: string | undefined) {
 	if (typeof str !== 'string') return false;
 	return /^\d+$/.test(str);
+}
+
+function isFloat(str: string | undefined) {
+	if (typeof str !== 'string') return false;
+	return /^\d+(?:\.\d+)?$/.test(str);
 }
 
 function rad(num: number) {

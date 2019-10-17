@@ -1,5 +1,5 @@
 import Drawer from '../../src/ts/stnm/Drawer';
-import Parser from '../../src/ts/stnm/Parser';
+import SynopParser, {TempParser} from '../../src/ts/stnm/Parser';
 
 
 function cvs(width = 400, height = 400): CanvasRenderingContext2D {
@@ -22,7 +22,7 @@ function cvs(width = 400, height = 400): CanvasRenderingContext2D {
 
 const drawer1 = new Drawer(cvs(), 200, 200);
 drawer1.drawWindBarb("3");
-drawer1.drawWindShaft("09", "65", "4");
+drawer1.drawWindShaftSYNOP("09", "65", "4");
 drawer1.drawCloudGenera("923", "4", "3", "2");
 drawer1.drawPressure("9925");
 drawer1.drawPressureTendency("3", "052");
@@ -32,13 +32,13 @@ drawer1.drawVisibility("05");
 drawer1.drawPrecipitation("9902");
 
 const drawer1_1 = new Drawer(cvs(), 200, 200);
-drawer1_1.drawFromParsedData(new Parser(
+drawer1_1.drawFromParsedData(new SynopParser(
 	"AAXX190041234500205309651021320187300004992553052699027473384923=="
 ).parse())
 
 const drawer2 = new Drawer(cvs(), 200, 200);
 drawer2.drawWindBarb("8")
-drawer2.drawWindShaft("20", "01", "4");
+drawer2.drawWindShaftSYNOP("20", "01", "4");
 drawer2.drawCloudGenera("1//", "8", "8", "5");
 drawer2.drawPressure("0132");
 drawer2.drawPressureTendency("8", "003");
@@ -48,13 +48,13 @@ drawer2.drawVisibility("47");
 drawer2.drawPrecipitation("0022");
 
 const drawer2_1 = new Drawer(cvs(), 200, 200);
-drawer2_1.drawFromParsedData(new Parser(
+drawer2_1.drawFromParsedData(new SynopParser(
 	"AAXX1900498765005478200111065210863000040132580036002279421881//91234=="
 ).parse())
 
 const drawer3 = new Drawer(cvs(), 200, 200);
 drawer3.drawWindBarb("/");
-drawer3.drawWindShaft("27", "//", "4");
+drawer3.drawWindShaftSYNOP("27", "//", "4");
 drawer3.drawCloudGenera("87/", "7", "/", "/");
 drawer3.drawPressure("0104");
 drawer3.drawPressureTendency("4", "000");
@@ -64,13 +64,13 @@ drawer3.drawVisibility("86");
 drawer3.drawPrecipitation("0002");
 
 const drawer3_1 = new Drawer(cvs(), 200, 200);
-drawer3_1.drawFromParsedData(new Parser(
+drawer3_1.drawFromParsedData(new SynopParser(
 	"AAXX190041111140/86/27//10003210033000040104540007////8787/99999222=="
 ).parse());
 
 const drawer4 = new Drawer(cvs(), 200, 200);
 drawer4.drawWindBarb("9");
-drawer4.drawWindShaft("04", "66", "1");
+drawer4.drawWindShaftSYNOP("04", "66", "1");
 drawer4.drawCloudGenera("///", "/", "9", "/");
 drawer4.drawPressure("0001");
 drawer4.drawPressureTendency("6", "001");
@@ -79,7 +79,7 @@ drawer4.drawTemperature("0232", "0147");
 drawer4.drawVisibility("91");
 
 const drawer4_1 = new Drawer(cvs(), 200, 200);
-drawer4_1.drawFromParsedData(new Parser(
+drawer4_1.drawFromParsedData(new SynopParser(
 	"AAXX190011111120/91904661023220147300004000156001755378////99999555=="
 ).parse());
 
@@ -88,7 +88,7 @@ drawer4_1.drawFromParsedData(new Parser(
 	const drawer5 = new Drawer(context, 256, 256, 32 / 25);
 
 	drawer5.drawWindBarb("4");
-	drawer5.drawWindShaft("03", "165", "4");
+	drawer5.drawWindShaftSYNOP("03", "165", "4");
 	drawer5.drawCloudGenera("489", "1", "4", "1");
 	drawer5.drawPressure("0182");
 	drawer5.drawPressureTendency("6", "001");
@@ -129,7 +129,7 @@ drawer4_1.drawFromParsedData(new Parser(
 
 // Tests for certain pathological cases - never emit things like "NaN" to the canvas.
 const drawer5 = new Drawer(cvs(), 200, 200);
-drawer5.drawFromParsedData(new Parser(
+drawer5.drawFromParsedData(new SynopParser(
 	"AAXX2300/20183="
 ).parse());
 
@@ -143,3 +143,20 @@ const drawer7 = new Drawer(cvs(), 200, 200);
 drawer7.drawWindBarb("9");
 drawer7.drawCloudGenera("///", "9", "9", "/");
 
+
+// Test upper air soundings report
+const drawer8 = new Drawer(cvs(), 200, 200);
+drawer8.drawFromParsedTempData(new TempParser(`
+66111 40948 99822 24081 03003 00034 ///// ///// 92741 /////
+///// 85491 ///// ///// 70148 10273 17009 50583 12770 26508
+40749 25763 23524 30951 41561 25036 25072 50164 24535 20217
+53372 25040 15398 62169 26058 10644 69567 26052 88999 77163
+26065 42013 31313 42308 81057=
+`.replace(/\s/g, ""), 700).parse());
+
+
+// Test invalid report encountered in the wild
+const drawer9 = new Drawer(cvs(), 200, 200);
+drawer9.drawFromParsedTempData(new TempParser(`
+5300/ 76405 51515 10158=TTAA 5300/ 76405 51515 10158=
+`.replace(/\s/g, ""), 700).parse());
