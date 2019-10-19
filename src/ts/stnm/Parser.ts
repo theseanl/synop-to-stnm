@@ -272,6 +272,6 @@ export const mandatoryPressureLevels = [1000, 925, 850, 700, 500, 400, 300, 250,
 
 function pressureLevelToReportIndicator(level: number) {
 	if (!mandatoryPressureLevels.includes(level)) return;
-	return level === 100 ? "00" : String((level / 10) | 0);
+	return level === 1000 ? "00" : String((level / 10) | 0);
 }
 
