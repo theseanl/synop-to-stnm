@@ -5,7 +5,7 @@ import EventEmitter from '../shared/EventEmitter';
 import CanvasPool from './CanvasPool';
 import {IReadOnlyBitMask} from '../shared/BitMask';
 import {debounceAnimation} from '../shared/utils'
-import Glide from '@glidejs/glide';
+import Glide = require('@glidejs/glide') // TODO: replace this with default import after tscc properly supports esModuleInterop
 import * as timeago from 'timeago.js';
 import enShort from './timeago_en_short';
 
@@ -113,7 +113,7 @@ export default class UIView {
 		this.drawButton.addEventListener('transitioncancel', onTransitionEnd);
 	}
 	private static rAFExecutor = (resolve: () => void) => {requestAnimationFrame(resolve);}
-	private async  transitionEnd() {
+	private async transitionEnd() {
 		await new Promise(this.transitionEndExecutor);
 		await new Promise(UIView.rAFExecutor);
 	}
@@ -202,7 +202,7 @@ export default class UIView {
 			short ? 'en_short' : 'en_US'
 		);
 		// Add event listeners
-		// recall call signature of EventEmitter.install: (listener:func, channel:number)=>any	
+		// recall call signature of EventEmitter.install: (listener:func, channel:number)=>any
 		this.queriesArea.querySelectorAll('.query__string').forEach(clickEventEmitter.install, clickEventEmitter);
 		this.queriesArea.querySelectorAll('.query__delete').forEach(deleteEventEmitter.install, deleteEventEmitter);
 	}
@@ -254,7 +254,7 @@ export default class UIView {
 			let renderingContext = this.pool.getContext();
 			if (renderingContext) {
 				wrapper.appendChild(renderingContext.canvas);
-			} else { // Canvas creation has failed - attach an empty placeholder, display error 
+			} else { // Canvas creation has failed - attach an empty placeholder, display error
 				wrapper.appendChild(this.getCanvasErrorBoxNode(
 					`Couldn't create more canvas to draw on. ` +
 					`Currently ${this.pool.getCurrentActiveCanvasCount()} canvases are in use. ` +

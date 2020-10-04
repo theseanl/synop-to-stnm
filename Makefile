@@ -9,27 +9,29 @@ endif
 DEST_GUARD=@mkdir -p $(OUT_DIR)/static
 TEST_DEST_GUARD=@mkdir -p build_test/stnm
 
+PACKAGER_FILES=package.json yarn.lock
+
 src/static/wxSym.js: src/third_party/WorldWeatherSymbols.js
 	$(DEST_GUARD)
 	node script/transform_svg_to_canvas_output.js
 
-$(OUT_DIR)/index.css: $(shell find src/style -name "*.css") $(shell find src/style/config -name "*.js")
+$(OUT_DIR)/index.css: $(shell find src/style -name "*.css") $(shell find src/style/config -name "*.js") $(PACKAGER_FILES)
 	$(DEST_GUARD)
 	@echo "Compiling public/index.css..."
-	postcss src/style/index.css -o $(OUT_DIR)/index.css --config $(POSTCSS_CONF)
+	yarn postcss src/style/index.css -o $(OUT_DIR)/index.css --config $(POSTCSS_CONF)
 	@echo "done."
 
-$(OUT_DIR)/static: $(shell find src/static) node_modules/timeago.js/dist/timeago.min.js
+$(OUT_DIR)/static: $(shell find src/static) node_modules/timeago.js/dist/timeago.min.js $(PACKAGER_FILES)
 	$(DEST_GUARD)
 	rsync -r src/static/ $(OUT_DIR)/static
 	rsync -r node_modules/timeago.js/dist/timeago.min.js $(OUT_DIR)/static/timeago.min.js
 
-$(OUT_DIR)/index.js: $(shell find src/ts -name "*.ts") src/ts/rollup.config.js src/ts/tscc.spec.json
+$(OUT_DIR)/index.js: $(shell find src/ts -name "*.ts") src/ts/rollup.config.js src/ts/tscc.spec.json $(PACKAGER_FILES)
 	$(DEST_GUARD)
 ifdef PROD
 	yarn tscc -s src/ts
 else
-	rollup -c src/ts/rollup.config.js
+	yarn rollup -c src/ts/rollup.config.js
 endif
 
 $(OUT_DIR)/index.html: src/index.html
@@ -46,7 +48,7 @@ endif
 
 $(OUT_DIR): $(OUT_DIR)/index.css $(OUT_DIR)/static $(OUT_DIR)/index.js $(OUT_DIR)/index.html $(OUT_DIR)/sw.js
 
-build_test/stnm/index.js: $(shell find src/ts -name "*.ts") $(shell find test/stnm -name "*.ts")
+build_test/stnm/index.js: $(shell find src/ts -name "*.ts") $(shell find test/stnm -name "*.ts") $(PACKAGER_FILES)
 	$(TEST_DEST_GUARD)
 	rollup -c test/stnm/rollup.config.js -i test/stnm/index.ts -d build_test/stnm
 
@@ -59,12 +61,12 @@ watch:
 	done
 
 liveserver:
-	sudo env "PATH=$(PATH)" live-server --port=80 --host=0.0.0.0 --no-browser --quiet \
+	sudo env "PATH=$(PATH)" yarn live-server --port=80 --host=0.0.0.0 --no-browser --quiet \
 		--mount=/:./$(OUT_DIR) --watch=$(OUT_DIR)
 
 ifndef PROD
 liveserver-test:
-	sudo env "PATH=$(PATH)" live-server --port=80 --host=0.0.0.0 --no-browser --quiet \
+	sudo env "PATH=$(PATH)" yarn live-server --port=80 --host=0.0.0.0 --no-browser --quiet \
 		--mount=/:./$(OUT_DIR) --mount=/test:./test --mount=/build_test:./build_test \
 		--watch=$(OUT_DIR),build_test
 

@@ -15,7 +15,7 @@ export declare interface IStorageHistoryEntity {
  * num: # of stored reports
  * h.0, h.1, ..: IStorageHistoryEntity, i.e.,
  * rep: {
- *     id: report of the entity "id" 
+ *     id: report of the entity "id"
  * }
  * curr: {
  *     id: current page of the entity "id"

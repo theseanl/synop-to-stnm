@@ -65,7 +65,7 @@ declare module '@glidejs/glide' {
 
     type EventHandler = (context: any) => void;
 
-    export default class Glide {
+    class Glide {
         settings: GlideOptions;
         index: number;
         disabled: boolean;
@@ -77,7 +77,7 @@ declare module '@glidejs/glide' {
         update(settings: GlideOptions): Glide;
         destroy(): Glide;
         move(distance: string): Glide;
-		on(event: GlideEvent | GlideEvent[], handler: EventHandler): Glide;
+        on(event: GlideEvent | GlideEvent[], handler: EventHandler): Glide;
         go(pattern: string | boolean): Glide;
         pause(): Glide;
         play(interval: number | boolean): Glide;
@@ -333,5 +333,7 @@ declare module '@glidejs/glide' {
     const Images: Component<ImagesInterface>;
     const Keyboard: Component<KeyboardInterface>;
     const Swipe: Component<SwipeInterface>;
+
+    export = Glide;
 }
 
